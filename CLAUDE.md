@@ -8,7 +8,7 @@ zsh-ai-cmd is a single-file zsh plugin that translates natural language to shell
 
 ## Architecture
 
-The entire plugin lives in `zsh-ai-cmd.plugin.zsh` (~140 lines). Key components:
+The entire plugin lives in @zsh-ai-cmd.plugin.zsh . Key components:
 
 - **Widget function** `_zsh_ai_cmd_suggest`: Main entry point bound to keybinding. Captures buffer text, builds API payload, calls API, replaces buffer with suggestion.
 - **API call** `_zsh_ai_cmd_call_api`: Background curl with animated braille spinner. Uses ZLE redraw for UI updates during blocking wait.
@@ -16,7 +16,7 @@ The entire plugin lives in `zsh-ai-cmd.plugin.zsh` (~140 lines). Key components:
 
 ## Testing
 
-No formal test suite. Manual testing:
+Replicated prompt and API tests live in @test-api.sh
 
 ```sh
 # Source the plugin directly

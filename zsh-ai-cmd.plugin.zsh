@@ -25,9 +25,18 @@ RULES:
 - If ambiguous, pick the most reasonable interpretation
 - Prefix standard tools with `command` to bypass aliases
 
+EFFICIENCY:
+- Avoid spawning processes per item: use -exec {} + not -exec {} \;
+- Use built-in formatting: find -printf, stat -c (not piping to awk/sed)
+- Add limits on unbounded searches: head, -maxdepth, 2>/dev/null for errors
+- Prefer human-readable output where appropriate (-h flags for sizes)
+
 <examples>
 User: list files
 command ls -la
+
+User: find 10 largest files
+command find . -type f -exec stat -f "%z %N" {} + 2>/dev/null | sort -rn | head -10
 
 User: find python files modified today
 command find . -name "*.py" -mtime -1
@@ -40,6 +49,15 @@ git worktree remove .
 
 User: kill process on port 3000
 command lsof -ti:3000 | xargs kill -9
+
+User: show disk usage by folder sorted by size
+command du -h -d 1 | sort -hr | head -20
+
+User: what is listening on port 8080
+command lsof -i :8080
+
+User: show processes sorted by memory
+command ps aux -m | head -15
 </examples>'
 
 # Context template (variables expanded at call time)
@@ -101,9 +119,17 @@ _zsh_ai_cmd_suggest() {
     return 1
   }
 
-  # Debug log
-  [[ $ZSH_AI_CMD_DEBUG == true ]] &&
-    print -r -- "$EPOCHSECONDS|$input|$suggestion" >>/tmp/zsh-ai-cmd.log
+  # Debug log (full request/response for inspection)
+  if [[ $ZSH_AI_CMD_DEBUG == true ]]; then
+    {
+      print -- "=== $(date '+%Y-%m-%d %H:%M:%S') ==="
+      print -- "--- REQUEST ---"
+      command jq . <<< "$payload"
+      print -- "--- RESPONSE ---"
+      command jq . <<< "$_ZSH_AI_CMD_RESPONSE"
+      print ""
+    } >>/tmp/zsh-ai-cmd.log
+  fi
 
   # Clear autosuggestions if loaded
   (( $+functions[_zsh_autosuggest_clear] )) && _zsh_autosuggest_clear
