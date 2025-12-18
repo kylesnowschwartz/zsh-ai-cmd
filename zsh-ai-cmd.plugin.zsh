@@ -1,22 +1,19 @@
 #!/usr/bin/env zsh
-# zsh-ai-cmd.plugin.zsh - HUD-style AI shell suggestions (ghost text)
+# zsh-ai-cmd.plugin.zsh - AI shell suggestions with ghost text
+# Ctrl+Z to request suggestion, Tab to accept, keep typing to refine
 # External deps: curl, jq, security (macOS Keychain)
-
-zmodload zsh/zpty 2>/dev/null || { print -u2 "zsh-ai-cmd: requires zsh/zpty"; return 1; }
 
 # ============================================================================
 # Configuration
 # ============================================================================
 typeset -g ZSH_AI_CMD_DEBUG=${ZSH_AI_CMD_DEBUG:-false}
 typeset -g ZSH_AI_CMD_MODEL=${ZSH_AI_CMD_MODEL:-'claude-haiku-4-5-20251001'}
-typeset -g ZSH_AI_CMD_MIN_CHARS=${ZSH_AI_CMD_MIN_CHARS:-5}
 
 # ============================================================================
 # Internal State
 # ============================================================================
 typeset -g _ZSH_AI_CMD_SUGGESTION=""
-typeset -g _ZSH_AI_CMD_LAST_BUFFER=""
-typeset -g _ZSH_AI_CMD_PTY="zsh_ai_cmd_pty"
+typeset -g _ZSH_AI_CMD_ORIGINAL_BUFFER=""
 
 # Cache OS at load time
 typeset -g _ZSH_AI_CMD_OS
@@ -65,16 +62,19 @@ PWD: $PWD
 </context>'
 
 # ============================================================================
-# Ghost Text Rendering
+# Ghost Text Display
 # ============================================================================
 
 _zsh_ai_cmd_show_ghost() {
   local suggestion=$1
   [[ $ZSH_AI_CMD_DEBUG == true ]] && print -- "show_ghost: suggestion='$suggestion' BUFFER='$BUFFER'" >> /tmp/zsh-ai-cmd.log
+
   if [[ -n $suggestion && $suggestion != $BUFFER ]]; then
     if [[ $suggestion == ${BUFFER}* ]]; then
+      # Suggestion is completion of current buffer - show suffix
       POSTDISPLAY="${suggestion#$BUFFER}"
     else
+      # Suggestion is different - show with arrow
       POSTDISPLAY=" → $suggestion"
     fi
     [[ $ZSH_AI_CMD_DEBUG == true ]] && print -- "show_ghost: POSTDISPLAY='$POSTDISPLAY'" >> /tmp/zsh-ai-cmd.log
@@ -86,19 +86,18 @@ _zsh_ai_cmd_show_ghost() {
 _zsh_ai_cmd_clear_ghost() {
   POSTDISPLAY=""
   _ZSH_AI_CMD_SUGGESTION=""
+  _ZSH_AI_CMD_ORIGINAL_BUFFER=""
 }
 
 # ============================================================================
-# Async API using zpty
+# API Call (synchronous with spinner - runs in widget context)
 # ============================================================================
 
-_zsh_ai_cmd_cleanup_pty() {
-  zpty -d "$_ZSH_AI_CMD_PTY" 2>/dev/null
-}
+_zsh_ai_cmd_call_api() {
+  local input=$1
 
-# Worker function that runs in the pty
-_zsh_ai_cmd_worker() {
-  local input=$1 api_key=$2 model=$3 prompt=$4
+  local context="${(e)_ZSH_AI_CMD_CONTEXT}"
+  local prompt="${_ZSH_AI_CMD_PROMPT}"$'\n'"${context}"
 
   local schema='{
     "type": "object",
@@ -111,7 +110,7 @@ _zsh_ai_cmd_worker() {
 
   local payload
   payload=$(command jq -nc \
-    --arg model "$model" \
+    --arg model "$ZSH_AI_CMD_MODEL" \
     --arg system "$prompt" \
     --arg content "$input" \
     --argjson schema "$schema" \
@@ -126,106 +125,67 @@ _zsh_ai_cmd_worker() {
   local response
   response=$(command curl -sS --max-time 10 "https://api.anthropic.com/v1/messages" \
     -H "Content-Type: application/json" \
-    -H "x-api-key: $api_key" \
+    -H "x-api-key: $ANTHROPIC_API_KEY" \
     -H "anthropic-version: 2023-06-01" \
     -H "anthropic-beta: structured-outputs-2025-11-13" \
     -d "$payload" 2>/dev/null)
 
-  local suggestion
-  suggestion=$(print -r -- "$response" | command jq -re '.content[0].text | fromjson | .command // empty' 2>/dev/null)
-
-  # Output just the suggestion (will be read by callback)
-  print -r -- "$suggestion"
+  # Extract command from structured output
+  print -r -- "$response" | command jq -re '.content[0].text | fromjson | .command // empty' 2>/dev/null
 }
 
-# Callback when pty has output (runs in ZLE context)
-_zsh_ai_cmd_pty_callback() {
-  local fd=$1
-  local err=$2
+# ============================================================================
+# Main Widget: Ctrl+Z to request suggestion
+# ============================================================================
 
-  # Handle errors/hangup
-  if [[ -n $err ]]; then
-    [[ $ZSH_AI_CMD_DEBUG == true ]] && print -- "pty_callback: error '$err'" >> /tmp/zsh-ai-cmd.log
-    zle -F $fd
-    _zsh_ai_cmd_cleanup_pty
-    return
-  fi
+_zsh_ai_cmd_suggest() {
+  [[ -z $BUFFER ]] && return
 
-  # Read from pty with timeout
-  local suggestion=""
-  zpty -r "$_ZSH_AI_CMD_PTY" suggestion '*'$'\n' 2>/dev/null
+  _zsh_ai_cmd_get_key || {
+    zle -M "zsh-ai-cmd: API key not found"
+    return 1
+  }
 
-  # Clean up trailing whitespace/newlines
-  suggestion="${suggestion%%$'\n'}"
-  suggestion="${suggestion%%$'\r'}"
-  suggestion="${suggestion## }"  # trim leading space
+  # Save original buffer
+  _ZSH_AI_CMD_ORIGINAL_BUFFER=$BUFFER
 
-  [[ $ZSH_AI_CMD_DEBUG == true ]] && print -- "pty_callback: got '$suggestion'" >> /tmp/zsh-ai-cmd.log
+  # Show spinner
+  local spinner='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+  local i=0
+
+  # Start API call in background
+  local tmpfile=$(mktemp)
+  ( _zsh_ai_cmd_call_api "$BUFFER" > "$tmpfile" ) &
+  local pid=$!
+
+  # Animate spinner while waiting
+  while kill -0 $pid 2>/dev/null; do
+    POSTDISPLAY=" ${spinner:$((i % 10)):1}"
+    zle -R
+    read -t 0.1 -k 1 && { kill $pid 2>/dev/null; POSTDISPLAY=""; rm -f "$tmpfile"; return; }
+    ((i++))
+  done
+  wait $pid
+
+  # Read result
+  local suggestion=$(<"$tmpfile")
+  rm -f "$tmpfile"
+
+  [[ $ZSH_AI_CMD_DEBUG == true ]] && print -- "suggest: got '$suggestion'" >> /tmp/zsh-ai-cmd.log
 
   if [[ -n $suggestion ]]; then
     _ZSH_AI_CMD_SUGGESTION=$suggestion
-
-    # Only show if buffer hasn't changed
-    if [[ $BUFFER == $_ZSH_AI_CMD_LAST_BUFFER ]]; then
-      _zsh_ai_cmd_show_ghost "$suggestion"
-      zle -R
-    fi
-
-    # Cleanup after getting result
-    zle -F $fd
-    _zsh_ai_cmd_cleanup_pty
-  fi
-}
-
-# Fire async request
-_zsh_ai_cmd_request_async() {
-  local input=$1
-
-  [[ $ZSH_AI_CMD_DEBUG == true ]] && print -- "request_async: '$input'" >> /tmp/zsh-ai-cmd.log
-
-  _zsh_ai_cmd_get_key || return 1
-  _zsh_ai_cmd_cleanup_pty
-
-  local context="${(e)_ZSH_AI_CMD_CONTEXT}"
-  local prompt="${_ZSH_AI_CMD_PROMPT}"$'\n'"${context}"
-
-  # Start worker in pty - zpty stores fd in $REPLY (zsh 5.0.8+)
-  zpty "$_ZSH_AI_CMD_PTY" "_zsh_ai_cmd_worker ${(q)input} ${(q)ANTHROPIC_API_KEY} ${(q)ZSH_AI_CMD_MODEL} ${(q)prompt}"
-  local pty_fd=$REPLY
-
-  [[ $ZSH_AI_CMD_DEBUG == true ]] && print -- "request_async: REPLY='$REPLY' pty_fd='$pty_fd'" >> /tmp/zsh-ai-cmd.log
-
-  if [[ -n $pty_fd && $pty_fd =~ ^[0-9]+$ ]]; then
-    zle -F $pty_fd _zsh_ai_cmd_pty_callback
-    _ZSH_AI_CMD_LAST_BUFFER=$input
+    _zsh_ai_cmd_show_ghost "$suggestion"
+    zle -R
   else
-    [[ $ZSH_AI_CMD_DEBUG == true ]] && print -- "request_async: failed to get pty fd" >> /tmp/zsh-ai-cmd.log
+    POSTDISPLAY=""
+    zle -M "zsh-ai-cmd: no suggestion"
   fi
 }
 
 # ============================================================================
-# Input Handling
+# Accept/Reject Handling
 # ============================================================================
-
-_zsh_ai_cmd_on_buffer_change() {
-  if [[ -n $POSTDISPLAY ]]; then
-    if [[ -n $_ZSH_AI_CMD_SUGGESTION && $_ZSH_AI_CMD_SUGGESTION == ${BUFFER}* ]]; then
-      _zsh_ai_cmd_show_ghost "$_ZSH_AI_CMD_SUGGESTION"
-    else
-      _zsh_ai_cmd_clear_ghost
-    fi
-  fi
-
-  (( ${#BUFFER} < ZSH_AI_CMD_MIN_CHARS )) && return
-  [[ $BUFFER == $_ZSH_AI_CMD_LAST_BUFFER ]] && return
-
-  if [[ $BUFFER =~ ^(cd|ls|git|cat|rm|mv|cp|mkdir|echo|grep|find|sed|awk|curl|wget|npm|yarn|docker|kubectl|python|ruby|node)[[:space:]] ]]; then
-    return
-  fi
-
-  [[ $ZSH_AI_CMD_DEBUG == true ]] && print -- "on_buffer_change: requesting '$BUFFER'" >> /tmp/zsh-ai-cmd.log
-  _zsh_ai_cmd_request_async "$BUFFER"
-}
 
 _zsh_ai_cmd_accept() {
   if [[ -n $_ZSH_AI_CMD_SUGGESTION ]]; then
@@ -237,8 +197,36 @@ _zsh_ai_cmd_accept() {
   fi
 }
 
+# Wrapper for self-insert: typing clears ghost or refines
+_zsh_ai_cmd_self_insert() {
+  zle .self-insert
+
+  # If we have a suggestion, update ghost based on new buffer
+  if [[ -n $_ZSH_AI_CMD_SUGGESTION ]]; then
+    if [[ $_ZSH_AI_CMD_SUGGESTION == ${BUFFER}* ]]; then
+      # User is typing toward the suggestion - update ghost
+      _zsh_ai_cmd_show_ghost "$_ZSH_AI_CMD_SUGGESTION"
+    else
+      # User diverged - clear ghost
+      _zsh_ai_cmd_clear_ghost
+    fi
+  fi
+}
+
+_zsh_ai_cmd_backward_delete_char() {
+  zle .backward-delete-char
+
+  if [[ -n $_ZSH_AI_CMD_SUGGESTION ]]; then
+    if [[ $_ZSH_AI_CMD_SUGGESTION == ${BUFFER}* ]]; then
+      _zsh_ai_cmd_show_ghost "$_ZSH_AI_CMD_SUGGESTION"
+    else
+      _zsh_ai_cmd_clear_ghost
+    fi
+  fi
+}
+
 # ============================================================================
-# Widget Registration
+# Line Lifecycle
 # ============================================================================
 
 _zsh_ai_cmd_line_init() {
@@ -246,32 +234,27 @@ _zsh_ai_cmd_line_init() {
 }
 
 _zsh_ai_cmd_line_finish() {
-  _zsh_ai_cmd_cleanup_pty
   _zsh_ai_cmd_clear_ghost
 }
 
-_zsh_ai_cmd_self_insert() {
-  zle .self-insert
-  [[ $ZSH_AI_CMD_DEBUG == true ]] && print -- "self-insert: '$BUFFER' len=${#BUFFER}" >> /tmp/zsh-ai-cmd.log
-  _zsh_ai_cmd_on_buffer_change
-}
-
-_zsh_ai_cmd_backward_delete_char() {
-  zle .backward-delete-char
-  _zsh_ai_cmd_on_buffer_change
-}
+# ============================================================================
+# Widget Registration
+# ============================================================================
 
 zle -N zle-line-init _zsh_ai_cmd_line_init
 zle -N zle-line-finish _zsh_ai_cmd_line_finish
 zle -N self-insert _zsh_ai_cmd_self_insert
 zle -N backward-delete-char _zsh_ai_cmd_backward_delete_char
+zle -N _zsh_ai_cmd_suggest
 zle -N _zsh_ai_cmd_accept
 
+bindkey '^Z' _zsh_ai_cmd_suggest
 bindkey '^I' _zsh_ai_cmd_accept
 
 # ============================================================================
 # API Key Management
 # ============================================================================
+
 _zsh_ai_cmd_get_key() {
   [[ -n $ANTHROPIC_API_KEY ]] && return 0
   ANTHROPIC_API_KEY=$(security find-generic-password \
