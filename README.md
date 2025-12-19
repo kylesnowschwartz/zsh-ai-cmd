@@ -29,12 +29,14 @@ export DEEPSEEK_API_KEY='sk-...'
 security add-generic-password -s 'anthropic-api-key' -a "$USER" -w 'sk-ant-...'
 ```
 
+> **Note:** If you use plugins that bind the right arrow key (like zsh-autocomplete or zsh-autosuggestions), load zsh-ai-cmd **after** them. The plugin chains to the previous binding, so right arrow still triggers their completions when no AI suggestion is active.
+
 ## Usage
 
 1. Type a natural language description
 2. Press `Ctrl+Z` to request a suggestion
-3. Ghost text appears showing the command: `find large files → command find . -size +100M`
-4. Press `Tab` to accept, or keep typing to dismiss
+3. Ghost text appears showing the command: `find large files → find . -size +100M`
+4. Press `Tab` or `→` to accept, or keep typing to dismiss
 
 ## Configuration
 
