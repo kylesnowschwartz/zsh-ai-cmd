@@ -28,6 +28,9 @@ typeset -g _ZSH_AI_CMD_SUGGESTION=""
 # OS detection (lazy-loaded on first API call)
 typeset -g _ZSH_AI_CMD_OS=""
 
+# Original widget for right arrow (for chaining)
+typeset -g _ZSH_AI_CMD_ORIG_FORWARD_CHAR=""
+
 # ============================================================================
 # System Prompt and Providers
 # ============================================================================
@@ -176,8 +179,18 @@ _zsh_ai_cmd_backward_delete_char() {
 }
 
 _zsh_ai_cmd_forward_char() {
-  _zsh_ai_cmd_clear_ghost
-  zle .forward-char
+  # Accept suggestion on right arrow (matches Copilot/zsh-autosuggestions UX)
+  if [[ -n $_ZSH_AI_CMD_SUGGESTION ]]; then
+    BUFFER=$_ZSH_AI_CMD_SUGGESTION
+    CURSOR=$#BUFFER
+    _zsh_ai_cmd_clear_ghost
+  elif [[ -n $_ZSH_AI_CMD_ORIG_FORWARD_CHAR ]]; then
+    # Chain to original widget (e.g., zsh-autocomplete)
+    zle "$_ZSH_AI_CMD_ORIG_FORWARD_CHAR"
+  else
+    # Fallback to builtin
+    zle .forward-char
+  fi
 }
 
 # ============================================================================
@@ -201,7 +214,12 @@ zle -N _zsh_ai_cmd_accept
 
 bindkey "$ZSH_AI_CMD_KEY" _zsh_ai_cmd_suggest
 bindkey '^I' _zsh_ai_cmd_accept
-bindkey '^[[C' _zsh_ai_cmd_forward_char  # Right arrow - clear ghost, move cursor
+
+# Capture original right arrow binding before overwriting (for widget chaining)
+# This preserves zsh-autocomplete or other plugins that use right arrow
+_ZSH_AI_CMD_ORIG_FORWARD_CHAR=$(bindkey -M main '^[[C' 2>/dev/null | awk '{print $2}')
+[[ $_ZSH_AI_CMD_ORIG_FORWARD_CHAR == _zsh_ai_cmd_forward_char ]] && _ZSH_AI_CMD_ORIG_FORWARD_CHAR=""
+bindkey '^[[C' _zsh_ai_cmd_forward_char
 
 # ============================================================================
 # API Key Management
