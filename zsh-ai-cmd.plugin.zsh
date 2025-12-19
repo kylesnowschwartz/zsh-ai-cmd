@@ -23,6 +23,39 @@ typeset -g _ZSH_AI_CMD_SUGGESTION=""
 typeset -g _ZSH_AI_CMD_OS=""
 
 # ============================================================================
+# Security: Sanitize model output
+# ============================================================================
+
+_zsh_ai_cmd_sanitize() {
+  setopt local_options extended_glob
+  local input=$1
+  local sanitized=$input
+  local esc=$'\x1b'
+
+  # Security sanitization for model output
+  # Prevents: newline injection, terminal escape attacks, control char manipulation
+
+  # 1. Strip ANSI CSI escape sequences FIRST: ESC [ params letter
+  #    Must happen before control char stripping or ESC gets removed separately
+  while [[ $sanitized == *${esc}\[* ]]; do
+    sanitized=${sanitized//${esc}\[[0-9;]#[A-Za-z]/}
+  done
+
+  # 2. Strip any remaining ESC characters (non-CSI escapes)
+  sanitized=${sanitized//${esc}/}
+
+  # 3. Strip control characters (0x00-0x1F except tab 0x09, and DEL 0x7F)
+  #    Now safe to remove remaining control chars including orphaned brackets
+  sanitized=${sanitized//[$'\x00'-$'\x08'$'\x0a'-$'\x1f'$'\x7f']/}
+
+  # 4. Trim leading/trailing whitespace
+  sanitized=${sanitized##[[:space:]]##}
+  sanitized=${sanitized%%[[:space:]]##}
+
+  print -r -- "$sanitized"
+}
+
+# ============================================================================
 # System Prompt (sourced from shared file)
 # ============================================================================
 source "${0:a:h}/prompt.zsh"
@@ -163,8 +196,9 @@ _zsh_ai_cmd_suggest() {
   done
   wait $pid 2>/dev/null
 
-  # Read result
-  local suggestion=$(<"$tmpfile")
+  # Read and sanitize result (security: strip control chars, newlines, escapes)
+  local suggestion
+  suggestion=$(_zsh_ai_cmd_sanitize "$(<"$tmpfile")")
   rm -f "$tmpfile"
 
   if [[ -n $suggestion ]]; then
