@@ -1,208 +1,188 @@
 #!/usr/bin/env zsh
 # test-api.sh - Validate API responses for format compliance
-# Usage: ./test-api.sh
+# Usage: ./test-api.sh [--provider anthropic|openai|ollama]
 
 set -uo pipefail
 
 SCRIPT_DIR="${0:a:h}"
 
-# Source plugin for config (ignore ZLE errors)
-typeset -g ZSH_AI_CMD_MODEL=${ZSH_AI_CMD_MODEL:-'claude-haiku-4-5-20251001'}
+# Parse args
+typeset -g ZSH_AI_CMD_PROVIDER=${ZSH_AI_CMD_PROVIDER:-'anthropic'}
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --provider|-p) ZSH_AI_CMD_PROVIDER=$2; shift 2 ;;
+    --help|-h) print "Usage: $0 [--provider anthropic|openai|ollama]"; exit 0 ;;
+    *) print -u2 "Unknown option: $1"; exit 1 ;;
+  esac
+done
 
-# Load prompt and OS detection from plugin
+# OS detection
 typeset -g _ZSH_AI_CMD_OS
 if [[ $OSTYPE == darwin* ]]; then
-    _ZSH_AI_CMD_OS="macOS $(sw_vers -productVersion 2>/dev/null || print 'unknown')"
+  _ZSH_AI_CMD_OS="macOS $(sw_vers -productVersion 2>/dev/null || print 'unknown')"
 else
-    _ZSH_AI_CMD_OS="Linux"
+  _ZSH_AI_CMD_OS="Linux"
 fi
 
-# Source shared prompt
-source "${SCRIPT_DIR}/prompt.zsh"
+# Debug mode
+typeset -g ZSH_AI_CMD_DEBUG=${ZSH_AI_CMD_DEBUG:-false}
+typeset -g ZSH_AI_CMD_LOG=${ZSH_AI_CMD_LOG:-/tmp/zsh-ai-cmd.log}
 
-# Get API key
+# Source prompt and providers
+source "${SCRIPT_DIR}/prompt.zsh"
+source "${SCRIPT_DIR}/providers/anthropic.zsh"
+source "${SCRIPT_DIR}/providers/openai.zsh"
+source "${SCRIPT_DIR}/providers/ollama.zsh"
+
+# Get API key for current provider
 get_api_key() {
-    [[ -n ${ANTHROPIC_API_KEY:-} ]] && return 0
-    ANTHROPIC_API_KEY=$(security find-generic-password \
-        -s "anthropic-api-key" -a "$USER" -w 2>/dev/null) || {
-        print -u2 "ANTHROPIC_API_KEY not found in env or keychain"
-        return 1
-    }
+  local provider=$ZSH_AI_CMD_PROVIDER
+
+  # Ollama doesn't need a key
+  [[ $provider == ollama ]] && return 0
+
+  local key_var="${(U)provider}_API_KEY"
+  local keychain_name="${provider}-api-key"
+
+  # Check env var
+  [[ -n ${(P)key_var} ]] && return 0
+
+  # Try macOS Keychain
+  local key
+  key=$(security find-generic-password -s "$keychain_name" -a "$USER" -w 2>/dev/null)
+  if [[ -n $key ]]; then
+    typeset -g "$key_var"="$key"
+    return 0
+  fi
+
+  print -u2 "${(U)provider}_API_KEY not found in env or keychain"
+  return 1
 }
-typeset -g ANTHROPIC_API_KEY
 
 PASS=0
 FAIL=0
 
-# Test cases: description -> expected characteristics
+# Test cases
 typeset -A TESTS=(
-    ["list files"]="simple"
-    ["find python files modified today"]="simple"
-    ["search for TODO in js files"]="simple"
-    ["show disk usage"]="simple"
-    ["kill process on port 3000"]="pipe"
-    ["consolidate git worktree into primary repo"]="ambiguous"
-    ["find all files larger than 100mb and delete them"]="dangerous"
-    ["compress all jpg files in current directory"]="archive"
-    ["show me the last 5 git commits with stats"]="git"
-    ["what time is it in tokyo"]="edge_case"
-    ["recursively find and replace foo with bar in all .txt files"]="complex"
-    ["list running docker containers sorted by memory usage"]="pipe"
-    # Generalization tests (no direct examples in prompt)
-    ["show modification time of README.md"]="bsd_stat"
-    ["show the date 3 days ago"]="bsd_date"
-    ["replace localhost with 127.0.0.1 in config.ini"]="bsd_sed"
-    ["find empty directories"]="find_edge"
-    ["create a tar.gz of the src directory"]="archive"
-    ["convert video.mp4 to animated gif"]="ffmpeg"
-    ["extract audio from movie.mkv as mp3"]="ffmpeg"
+  ["list files"]="simple"
+  ["find python files modified today"]="simple"
+  ["search for TODO in js files"]="simple"
+  ["show disk usage"]="simple"
+  ["kill process on port 3000"]="pipe"
+  ["consolidate git worktree into primary repo"]="ambiguous"
+  ["find all files larger than 100mb and delete them"]="dangerous"
+  ["compress all jpg files in current directory"]="archive"
+  ["show me the last 5 git commits with stats"]="git"
+  ["what time is it in tokyo"]="edge_case"
+  ["recursively find and replace foo with bar in all .txt files"]="complex"
+  ["list running docker containers sorted by memory usage"]="pipe"
+  ["show modification time of README.md"]="bsd_stat"
+  ["show the date 3 days ago"]="bsd_date"
+  ["replace localhost with 127.0.0.1 in config.ini"]="bsd_sed"
+  ["find empty directories"]="find_edge"
+  ["create a tar.gz of the src directory"]="archive"
+  ["convert video.mp4 to animated gif"]="ffmpeg"
+  ["extract audio from movie.mkv as mp3"]="ffmpeg"
 )
 
 validate_output() {
-    local output=$1
-    local errors=()
+  local output=$1
+  local errors=()
 
-    # Must not be empty
-    [[ -z $output ]] && errors+=("empty output")
+  [[ -z $output ]] && errors+=("empty output")
+  [[ $output == *'```'* ]] && errors+=("contains code fence")
+  [[ $output == *'`'* ]] && errors+=("contains backticks")
+  [[ $output == *$'\n'* ]] && errors+=("multi-line output")
+  [[ $output == *"Or "* ]] && errors+=("contains alternatives")
+  [[ $output == *"you can"* ]] && errors+=("contains explanation")
+  [[ $output == *"Note:"* ]] && errors+=("contains note")
+  [[ $output == *"#"* && $output != *"xargs"* ]] && errors+=("contains comment")
+  [[ ! $output =~ ^[a-zA-Z./\(] ]] && errors+=("doesn't start like a command")
 
-    # No markdown code blocks
-    [[ $output == *'```'* ]] && errors+=("contains code fence")
-
-    # No backticks at all
-    [[ $output == *'`'* ]] && errors+=("contains backticks")
-
-    # Single line only
-    [[ $output == *$'\n'* ]] && errors+=("multi-line output")
-
-    # No explanatory text patterns
-    [[ $output == *"Or "* ]] && errors+=("contains alternatives")
-    [[ $output == *"you can"* ]] && errors+=("contains explanation")
-    [[ $output == *"Note:"* ]] && errors+=("contains note")
-    [[ $output == *"#"* && $output != *"xargs"* ]] && errors+=("contains comment")
-
-    # Should look like a command (starts with word char or path)
-    [[ ! $output =~ ^[a-zA-Z./\(] ]] && errors+=("doesn't start like a command")
-
-    if (( ${#errors[@]} > 0 )); then
-        print -r -- "${(j:, :)errors}"
-        return 1
-    fi
-    return 0
+  if (( ${#errors[@]} > 0 )); then
+    print -r -- "${(j:, :)errors}"
+    return 1
+  fi
+  return 0
 }
 
 call_api() {
-    local input=$1
+  local input=$1
 
-    local context="<context>
+  local context="<context>
 OS: $_ZSH_AI_CMD_OS
 Shell: zsh
 PWD: /tmp/test
 </context>"
 
-    local prompt="${_ZSH_AI_CMD_PROMPT}"$'\n'"${context}"
+  local prompt="${_ZSH_AI_CMD_PROMPT}"$'\n'"${context}"
 
-    local schema='{
-      "type": "object",
-      "properties": {
-        "command": {
-          "type": "string",
-          "description": "The shell command to execute"
-        }
-      },
-      "required": ["command"],
-      "additionalProperties": false
-    }'
-
-    # Build payload with jq (handles all escaping correctly)
-    local payload
-    payload=$(command jq -nc \
-        --arg model "$ZSH_AI_CMD_MODEL" \
-        --arg system "$prompt" \
-        --arg content "$input" \
-        --argjson schema "$schema" \
-        '{
-          model: $model,
-          max_tokens: 256,
-          system: $system,
-          messages: [{role: "user", content: $content}],
-          output_format: {type: "json_schema", schema: $schema}
-        }')
-
-    local response
-    response=$(command curl -sS --max-time 30 "https://api.anthropic.com/v1/messages" \
-        -H "Content-Type: application/json" \
-        -H "x-api-key: $ANTHROPIC_API_KEY" \
-        -H "anthropic-version: 2023-06-01" \
-        -H "anthropic-beta: structured-outputs-2025-11-13" \
-        -d "$payload")
-
-    # Check for API error
-    local err=$(print -r -- "$response" | command jq -r '.error.message // empty')
-    if [[ -n $err ]]; then
-        print -r -- "API_ERROR: $err"
-        return 1
-    fi
-
-    # Extract command from structured output
-    local cmd=$(print -r -- "$response" | command jq -re '.content[0].text | fromjson | .command // empty' 2>/dev/null)
-    if [[ -z $cmd ]]; then
-        # Fallback: try plain text extraction
-        cmd=$(print -r -- "$response" | command jq -re '.content[0].text // empty' 2>/dev/null)
-    fi
-
-    print -r -- "$cmd"
+  # Dispatch to provider
+  case $ZSH_AI_CMD_PROVIDER in
+    anthropic) _zsh_ai_cmd_anthropic_call "$input" "$prompt" ;;
+    openai)    _zsh_ai_cmd_openai_call "$input" "$prompt" ;;
+    ollama)    _zsh_ai_cmd_ollama_call "$input" "$prompt" ;;
+    *) print -u2 "Unknown provider: $ZSH_AI_CMD_PROVIDER"; return 1 ;;
+  esac
 }
 
 run_test() {
-    local input=$1
-    local category=$2
+  local input=$1
+  local category=$2
 
-    printf "%-50s " "$input"
+  printf "%-50s " "$input"
 
-    local output
-    output=$(call_api "$input")
-    local api_status=$?
+  local output
+  output=$(call_api "$input")
 
-    if [[ $output == API_ERROR:* ]]; then
-        print -P "%F{red}API ERROR%f: ${output#API_ERROR: }"
-        ((FAIL++))
-        return 1
-    fi
+  if [[ -z $output ]]; then
+    print -P "%F{red}FAIL%f (no response)"
+    ((FAIL++))
+    return 1
+  fi
 
-    local validation
-    validation=$(validate_output "$output")
-    local valid_status=$?
+  local validation
+  validation=$(validate_output "$output")
+  local valid_status=$?
 
-    if (( valid_status == 0 )); then
-        print -P "%F{green}PASS%f"
-        print "  -> $output"
-        ((PASS++))
-    else
-        print -P "%F{red}FAIL%f ($validation)"
-        print "  -> $output"
-        ((FAIL++))
-    fi
+  if (( valid_status == 0 )); then
+    print -P "%F{green}PASS%f"
+    print "  -> $output"
+    ((PASS++))
+  else
+    print -P "%F{red}FAIL%f ($validation)"
+    print "  -> $output"
+    ((FAIL++))
+  fi
+}
+
+get_model_name() {
+  case $ZSH_AI_CMD_PROVIDER in
+    anthropic) print "$ZSH_AI_CMD_ANTHROPIC_MODEL" ;;
+    openai)    print "$ZSH_AI_CMD_OPENAI_MODEL" ;;
+    ollama)    print "$ZSH_AI_CMD_OLLAMA_MODEL" ;;
+  esac
 }
 
 main() {
-    print "Testing zsh-ai-cmd API responses"
-    print "Model: $ZSH_AI_CMD_MODEL"
-    print "================================"
-    print ""
+  print "Testing zsh-ai-cmd API responses"
+  print "Provider: $ZSH_AI_CMD_PROVIDER"
+  print "Model: $(get_model_name)"
+  print "================================"
+  print ""
 
-    # Ensure API key is available
-    get_api_key || exit 1
+  get_api_key || exit 1
 
-    for input category in "${(@kv)TESTS}"; do
-        run_test "$input" "$category"
-    done
+  for input category in "${(@kv)TESTS}"; do
+    run_test "$input" "$category"
+  done
 
-    print ""
-    print "================================"
-    print "Results: $PASS passed, $FAIL failed"
+  print ""
+  print "================================"
+  print "Results: $PASS passed, $FAIL failed"
 
-    (( FAIL > 0 )) && exit 1
-    exit 0
+  (( FAIL > 0 )) && exit 1
+  exit 0
 }
 
 main "$@"
