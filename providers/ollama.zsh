@@ -1,5 +1,5 @@
 # providers/ollama.zsh - Ollama local inference provider
-# No API key required, runs locally. No native JSON mode - uses prompt engineering.
+# No API key required, runs locally. Uses structured outputs since Ollama v0.5.
 
 typeset -g ZSH_AI_CMD_OLLAMA_MODEL=${ZSH_AI_CMD_OLLAMA_MODEL:-'mistral-small'}
 typeset -g ZSH_AI_CMD_OLLAMA_HOST=${ZSH_AI_CMD_OLLAMA_HOST:-'localhost:11434'}
@@ -8,17 +8,10 @@ _zsh_ai_cmd_ollama_call() {
   local input=$1
   local prompt=$2
 
-  # Append strict JSON format instruction (no native JSON mode in Ollama)
-  local json_prompt="$prompt
-
-CRITICAL: Respond with ONLY valid JSON. No text before or after.
-Format: {\"command\": \"your shell command here\"}
-Example: {\"command\": \"ls -la\"}"
-
   local payload
   payload=$(command jq -nc \
     --arg model "$ZSH_AI_CMD_OLLAMA_MODEL" \
-    --arg system "$json_prompt" \
+    --arg system "$prompt" \
     --arg content "$input" \
     '{
       model: $model,
@@ -26,7 +19,14 @@ Example: {\"command\": \"ls -la\"}"
         {role: "system", content: $system},
         {role: "user", content: $content}
       ],
-      stream: false
+      stream: false,
+      format: {
+        type: "object",
+        properties: {
+          command: {type: "string", description: "The shell command"}
+        },
+        required: ["command"]
+      }
     }')
 
   local response
@@ -46,18 +46,18 @@ Example: {\"command\": \"ls -la\"}"
     } >>$ZSH_AI_CMD_LOG
   fi
 
-  # Extract command - Ollama puts response in .message.content
+  # Extract command - structured output ensures valid JSON in .message.content
   local content
   content=$(print -r -- "$response" | command jq -re '.message.content // empty' 2>/dev/null)
   [[ -z $content ]] && return 1
 
-  # Parse JSON from content (may have extra text, try to extract JSON)
+  # Parse JSON - structured output should guarantee valid JSON
   print -r -- "$content" | command jq -re '.command // empty' 2>/dev/null && return 0
 
-  # Fallback: try to find JSON in response (some models add explanation text)
-  local json_match
-  json_match=$(print -r -- "$content" | command grep -oE '\{[^}]+\}' | head -1)
-  [[ -n $json_match ]] && print -r -- "$json_match" | command jq -re '.command // empty' 2>/dev/null
+  # Fallback: extract with sed if JSON parsing fails (older Ollama versions)
+  local cmd
+  cmd=$(print -r -- "$content" | command sed -n 's/.*"command"[[:space:]]*:[[:space:]]*"\(.*\)".*/\1/p' | head -1)
+  [[ -n $cmd ]] && { print -r -- "$cmd"; return 0; }
 }
 
 _zsh_ai_cmd_ollama_key_error() {

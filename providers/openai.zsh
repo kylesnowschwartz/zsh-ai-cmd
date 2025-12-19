@@ -1,5 +1,5 @@
 # providers/openai.zsh - OpenAI API provider
-# Uses JSON mode for structured output (less strict than Anthropic's schema)
+# Uses structured outputs with JSON schema for reliable command extraction
 
 typeset -g ZSH_AI_CMD_OPENAI_MODEL=${ZSH_AI_CMD_OPENAI_MODEL:-'gpt-5-mini'}
 
@@ -7,15 +7,10 @@ _zsh_ai_cmd_openai_call() {
   local input=$1
   local prompt=$2
 
-  # Append JSON format instruction to system prompt
-  local json_prompt="$prompt
-
-IMPORTANT: Respond with valid JSON only. Format: {\"command\": \"your shell command here\"}"
-
   local payload
   payload=$(command jq -nc \
     --arg model "$ZSH_AI_CMD_OPENAI_MODEL" \
-    --arg system "$json_prompt" \
+    --arg system "$prompt" \
     --arg content "$input" \
     '{
       model: $model,
@@ -24,7 +19,21 @@ IMPORTANT: Respond with valid JSON only. Format: {\"command\": \"your shell comm
         {role: "system", content: $system},
         {role: "user", content: $content}
       ],
-      response_format: {type: "json_object"}
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "shell_command",
+          schema: {
+            type: "object",
+            properties: {
+              command: {type: "string", description: "The shell command"}
+            },
+            required: ["command"],
+            additionalProperties: false
+          },
+          strict: true
+        }
+      }
     }')
 
   local response

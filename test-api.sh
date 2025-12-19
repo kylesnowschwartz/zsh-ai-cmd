@@ -11,7 +11,7 @@ typeset -g ZSH_AI_CMD_PROVIDER=${ZSH_AI_CMD_PROVIDER:-'anthropic'}
 while [[ $# -gt 0 ]]; do
   case $1 in
     --provider|-p) ZSH_AI_CMD_PROVIDER=$2; shift 2 ;;
-    --help|-h) print "Usage: $0 [--provider anthropic|openai|ollama]"; exit 0 ;;
+    --help|-h) print "Usage: $0 [--provider anthropic|openai|ollama|deepseek|gemini]"; exit 0 ;;
     *) print -u2 "Unknown option: $1"; exit 1 ;;
   esac
 done
@@ -33,6 +33,8 @@ source "${SCRIPT_DIR}/prompt.zsh"
 source "${SCRIPT_DIR}/providers/anthropic.zsh"
 source "${SCRIPT_DIR}/providers/openai.zsh"
 source "${SCRIPT_DIR}/providers/ollama.zsh"
+source "${SCRIPT_DIR}/providers/deepseek.zsh"
+source "${SCRIPT_DIR}/providers/gemini.zsh"
 
 # Get API key for current provider
 get_api_key() {
@@ -122,6 +124,8 @@ PWD: /tmp/test
     anthropic) _zsh_ai_cmd_anthropic_call "$input" "$prompt" ;;
     openai)    _zsh_ai_cmd_openai_call "$input" "$prompt" ;;
     ollama)    _zsh_ai_cmd_ollama_call "$input" "$prompt" ;;
+    deepseek)  _zsh_ai_cmd_deepseek_call "$input" "$prompt" ;;
+    gemini)    _zsh_ai_cmd_gemini_call "$input" "$prompt" ;;
     *) print -u2 "Unknown provider: $ZSH_AI_CMD_PROVIDER"; return 1 ;;
   esac
 }
@@ -161,6 +165,8 @@ get_model_name() {
     anthropic) print "$ZSH_AI_CMD_ANTHROPIC_MODEL" ;;
     openai)    print "$ZSH_AI_CMD_OPENAI_MODEL" ;;
     ollama)    print "$ZSH_AI_CMD_OLLAMA_MODEL" ;;
+    deepseek)  print "$ZSH_AI_CMD_DEEPSEEK_MODEL" ;;
+    gemini)    print "$ZSH_AI_CMD_GEMINI_MODEL" ;;
   esac
 }
 
