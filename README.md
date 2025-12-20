@@ -41,6 +41,7 @@ security add-generic-password -s 'anthropic-api-key' -a "$USER" -w 'sk-ant-...'
 ```sh
 ZSH_AI_CMD_PROVIDER='anthropic'              # Provider: anthropic, openai, gemini, deepseek, ollama
 ZSH_AI_CMD_KEY='^z'                          # Trigger key (default: Ctrl+Z)
+ZSH_AI_CMD_HIGHLIGHT='fg=8'                  # Ghost text style (zsh region_highlight format)
 ZSH_AI_CMD_DEBUG=false                       # Enable debug logging
 ZSH_AI_CMD_LOG=/tmp/zsh-ai-cmd.log           # Debug log path
 

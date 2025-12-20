@@ -12,6 +12,7 @@
 typeset -g ZSH_AI_CMD_KEY=${ZSH_AI_CMD_KEY:-'^z'}
 typeset -g ZSH_AI_CMD_DEBUG=${ZSH_AI_CMD_DEBUG:-false}
 typeset -g ZSH_AI_CMD_LOG=${ZSH_AI_CMD_LOG:-/tmp/zsh-ai-cmd.log}
+typeset -g ZSH_AI_CMD_HIGHLIGHT=${ZSH_AI_CMD_HIGHLIGHT:-'fg=8'}
 
 # Provider selection (anthropic, openai, gemini, deepseek, ollama)
 typeset -g ZSH_AI_CMD_PROVIDER=${ZSH_AI_CMD_PROVIDER:-'anthropic'}
@@ -100,10 +101,10 @@ _zsh_ai_cmd_show_ghost() {
       # Suggestion is different - show with tab hint
       POSTDISPLAY="  ⇥  ${suggestion}"
     fi
-    # Apply grey highlighting with unique color (fg=242 to avoid collision with autosuggestions' fg=8)
+    # Apply highlight (uses tracked entry for clean removal, no collision with other plugins)
     local start=$#BUFFER
     local end=$(( start + $#POSTDISPLAY ))
-    _ZSH_AI_CMD_LAST_HIGHLIGHT="$start $end fg=242"
+    _ZSH_AI_CMD_LAST_HIGHLIGHT="$start $end $ZSH_AI_CMD_HIGHLIGHT"
     region_highlight+=("$_ZSH_AI_CMD_LAST_HIGHLIGHT")
     [[ $ZSH_AI_CMD_DEBUG == true ]] && print -- "show_ghost: POSTDISPLAY='$POSTDISPLAY'" >> $ZSH_AI_CMD_LOG
   else
