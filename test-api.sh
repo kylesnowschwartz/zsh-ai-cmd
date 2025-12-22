@@ -127,6 +127,7 @@ PWD: /tmp/test
     ollama)    _zsh_ai_cmd_ollama_call "$input" "$prompt" ;;
     deepseek)  _zsh_ai_cmd_deepseek_call "$input" "$prompt" ;;
     gemini)    _zsh_ai_cmd_gemini_call "$input" "$prompt" ;;
+    copilot)   _zsh_ai_cmd_copilot_call "$input" "$prompt" ;;
     *) print -u2 "Unknown provider: $ZSH_AI_CMD_PROVIDER"; return 1 ;;
   esac
 }
