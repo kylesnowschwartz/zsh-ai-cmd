@@ -13,6 +13,7 @@ typeset -g ZSH_AI_CMD_KEY=${ZSH_AI_CMD_KEY:-'^z'}
 typeset -g ZSH_AI_CMD_DEBUG=${ZSH_AI_CMD_DEBUG:-false}
 typeset -g ZSH_AI_CMD_LOG=${ZSH_AI_CMD_LOG:-/tmp/zsh-ai-cmd.log}
 typeset -g ZSH_AI_CMD_HIGHLIGHT=${ZSH_AI_CMD_HIGHLIGHT:-'fg=8'}
+typeset -g ZSH_AI_CMD_KEYCHAIN_NAME=${ZSH_AI_CMD_KEYCHAIN_NAME:-'${provider}-api-key'}
 
 # Provider selection (anthropic, openai, gemini, deepseek, ollama)
 typeset -g ZSH_AI_CMD_PROVIDER=${ZSH_AI_CMD_PROVIDER:-'anthropic'}
@@ -317,7 +318,7 @@ _zsh_ai_cmd_get_key() {
   [[ $provider == ollama || $provider == copilot ]] && return 0
 
   local key_var="${(U)provider}_API_KEY"
-  local keychain_name="${provider}-api-key"
+  local keychain_name="${(e)ZSH_AI_CMD_KEYCHAIN_NAME}"
 
   # Check env var
   [[ -n ${(P)key_var} ]] && return 0
