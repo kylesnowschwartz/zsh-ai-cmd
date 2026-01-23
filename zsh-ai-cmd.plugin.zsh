@@ -321,10 +321,23 @@ _zsh_ai_cmd_get_key() {
   [[ $provider == ollama || $provider == copilot ]] && return 0
 
   local key_var="${(U)provider}_API_KEY"
-  local keychain_name="${(e)ZSH_AI_CMD_KEYCHAIN_NAME}"
 
   # Check env var
   [[ -n ${(P)key_var} ]] && return 0
+
+  local api_key_command_key="ZSH_AI_${(U)provider}_API_KEY_COMMAND"
+  local api_key_command="${(P)api_key_command_key}"
+
+  # Try custom command
+  if [[ -n $api_key_command ]]; then
+    key=$(${=api_key_command} 2>/dev/null)
+    if [[ -n $key ]]; then
+      typeset -g "$key_var"="$key"
+      return 0
+    fi
+  fi
+
+  local keychain_name="${(e)ZSH_AI_CMD_KEYCHAIN_NAME}"
 
   # Try macOS Keychain
   local key

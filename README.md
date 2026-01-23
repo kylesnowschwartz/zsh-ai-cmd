@@ -27,6 +27,12 @@ export DEEPSEEK_API_KEY='sk-...'
 
 # Or use macOS Keychain
 security add-generic-password -s 'anthropic-api-key' -a "$USER" -w 'sk-ant-...'
+
+# Or use a command to get the key
+export ZSH_AI_OPENAI_API_KEY_COMMAND="secret-tool lookup service openai"
+export ZSH_AI_ANTHROPIC_API_KEY_COMMAND="secret-tool lookup service anthropic"
+export ZSH_AI_GEMINI_API_KEY_COMMAND="secret-tool lookup service gemini"
+export ZSH_AI_DEEPSEEK_API_KEY_COMMAND="secret-tool lookup service deepseek"
 ```
 
 ## Usage
