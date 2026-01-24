@@ -20,8 +20,11 @@ The main plugin lives in @zsh-ai-cmd.plugin.zsh with provider implementations in
  | DeepSeek   | `providers/deepseek.zsh`  | `deepseek-chat`             | `DEEPSEEK_API_KEY`  |
  | Ollama     | `providers/ollama.zsh`    | `mistral-small`             | (none - local)      |
  | Copilot    | `providers/copilot.zsh`   | `gpt-4o`                    | (none - local)      |
+ | Claude Code| `providers/claude-code.zsh`| `haiku`                    | (none - subscription) |
 
 Set provider via `ZSH_AI_CMD_PROVIDER='openai'` (default: `anthropic`).
+
+**Note:** Claude Code requires [Claude Code CLI](https://claude.ai/code) to be installed and authenticated. Install with `npm install -g @anthropic-ai/claude-code` and run `claude login`.
 
 **Note:** Copilot requires [copilot-api](https://github.com/ericc-ch/copilot-api) to be running. Install and start with `npx copilot-api start`.
 
@@ -75,6 +78,8 @@ API response validation tests live in @test-api.sh:
 ./test-api.sh --provider gemini
 ./test-api.sh --provider ollama
 ./test-api.sh --provider deepseek
+./test-api.sh --provider copilot
+./test-api.sh --provider claude-code
 ```
 
 Manual testing:
