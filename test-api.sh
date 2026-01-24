@@ -11,7 +11,7 @@ typeset -g ZSH_AI_CMD_PROVIDER=${ZSH_AI_CMD_PROVIDER:-'anthropic'}
 while [[ $# -gt 0 ]]; do
   case $1 in
     --provider|-p) ZSH_AI_CMD_PROVIDER=$2; shift 2 ;;
-    --help|-h) print "Usage: $0 [--provider anthropic|openai|ollama|deepseek|gemini|copilot]"; exit 0 ;;
+    --help|-h) print "Usage: $0 [--provider anthropic|openai|ollama|deepseek|gemini|copilot|claude-code]"; exit 0 ;;
     *) print -u2 "Unknown option: $1"; exit 1 ;;
   esac
 done
@@ -36,13 +36,14 @@ source "${SCRIPT_DIR}/providers/ollama.zsh"
 source "${SCRIPT_DIR}/providers/deepseek.zsh"
 source "${SCRIPT_DIR}/providers/gemini.zsh"
 source "${SCRIPT_DIR}/providers/copilot.zsh"
+source "${SCRIPT_DIR}/providers/claude-code.zsh"
 
 # Get API key for current provider
 get_api_key() {
   local provider=$ZSH_AI_CMD_PROVIDER
 
-  # Ollama and Copilot don't need a key
-  [[ $provider == ollama || $provider == copilot ]] && return 0
+  # Ollama, Copilot, and Claude Code don't need a key
+  [[ $provider == ollama || $provider == copilot || $provider == claude-code ]] && return 0
 
   local key_var="${(U)provider}_API_KEY"
   local keychain_name="${(e)ZSH_AI_CMD_KEYCHAIN_NAME:-${provider}-api-key}"
@@ -127,7 +128,8 @@ PWD: /tmp/test
     ollama)    _zsh_ai_cmd_ollama_call "$input" "$prompt" ;;
     deepseek)  _zsh_ai_cmd_deepseek_call "$input" "$prompt" ;;
     gemini)    _zsh_ai_cmd_gemini_call "$input" "$prompt" ;;
-    copilot)   _zsh_ai_cmd_copilot_call "$input" "$prompt" ;;
+    copilot)     _zsh_ai_cmd_copilot_call "$input" "$prompt" ;;
+    claude-code) _zsh_ai_cmd_claude_code_call "$input" "$prompt" ;;
     *) print -u2 "Unknown provider: $ZSH_AI_CMD_PROVIDER"; return 1 ;;
   esac
 }
@@ -169,7 +171,8 @@ get_model_name() {
     ollama)    print "$ZSH_AI_CMD_OLLAMA_MODEL" ;;
     deepseek)  print "$ZSH_AI_CMD_DEEPSEEK_MODEL" ;;
     gemini)    print "$ZSH_AI_CMD_GEMINI_MODEL" ;;
-    copilot)   print "$ZSH_AI_CMD_COPILOT_MODEL" ;;
+    copilot)     print "$ZSH_AI_CMD_COPILOT_MODEL" ;;
+    claude-code) print "$ZSH_AI_CMD_CLAUDE_CODE_MODEL" ;;
   esac
 }
 
