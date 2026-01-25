@@ -48,6 +48,9 @@ ZSH_AI_CMD_LOG=/tmp/zsh-ai-cmd.log           # Debug log path
 # macOS Keychain lookup (${provider} is interpolated at runtime)
 ZSH_AI_CMD_KEYCHAIN_NAME='${provider}-api-key'  # Or use a fixed name: 'my-api-key'
 
+# Custom command for API key retrieval (optional, uses ${provider} expansion)
+ZSH_AI_CMD_API_KEY_COMMAND=''    # Command to get API key, e.g., 'secret-tool lookup service ${provider}'
+
 # Provider-specific models (defaults shown)
 ZSH_AI_CMD_ANTHROPIC_MODEL='claude-haiku-4-5-20251001'
 ZSH_AI_CMD_OPENAI_MODEL='gpt-5.2-2025-12-11'
@@ -57,6 +60,36 @@ ZSH_AI_CMD_OLLAMA_MODEL='mistral-small'
 ZSH_AI_CMD_COPILOT_MODEL='gpt-4o'           # Requires copilot-api (npx copilot-api start)
 ZSH_AI_CMD_COPILOT_HOST='localhost:4141'    # copilot-api endpoint
 ```
+
+## Custom API Key Retrieval
+
+By default, zsh-ai-cmd checks:
+1. Environment variables (`ANTHROPIC_API_KEY`, etc.)
+2. Custom command (`ZSH_AI_CMD_API_KEY_COMMAND` with `${provider}` expansion)
+3. macOS Keychain
+
+To use a custom command, set `ZSH_AI_CMD_API_KEY_COMMAND`:
+
+```sh
+# Linux with GNOME Keyring
+export ZSH_AI_CMD_API_KEY_COMMAND='secret-tool lookup service ${provider}'
+
+# pass password manager
+export ZSH_AI_CMD_API_KEY_COMMAND='pass show ${provider}-api-key'
+
+# 1Password CLI
+export ZSH_AI_CMD_API_KEY_COMMAND='op read op://Private/${provider}-api-key'
+
+# AWS Secrets Manager
+export ZSH_AI_CMD_API_KEY_COMMAND='aws secretsmanager get-secret-value --secret-id ${provider}-api-key --query SecretString --output text'
+```
+
+**Important**:
+- Use `${provider}` for dynamic expansion (works for all providers: anthropic, openai, etc.)
+- Command must output the API key to stdout
+- Empty output or command failure falls back to Keychain
+- Output is automatically sanitized (control characters stripped for security)
+- Debug logging never logs the actual key value—use `ZSH_AI_CMD_DEBUG=true` to troubleshoot
 
 ## Provider Comparison
 

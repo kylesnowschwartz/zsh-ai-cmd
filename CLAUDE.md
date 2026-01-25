@@ -25,6 +25,18 @@ Set provider via `ZSH_AI_CMD_PROVIDER='openai'` (default: `anthropic`).
 
 **Note:** Copilot requires [copilot-api](https://github.com/ericc-ch/copilot-api) to be running. Install and start with `npx copilot-api start`.
 
+### API Key Retrieval
+
+Keys are retrieved in this order:
+1. Environment variables (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, etc.)
+2. Custom command (`ZSH_AI_CMD_API_KEY_COMMAND` with `${provider}` expansion) — if configured
+3. macOS Keychain (`ZSH_AI_CMD_KEYCHAIN_NAME`)
+
+**Example custom command**:
+```sh
+export ZSH_AI_CMD_API_KEY_COMMAND='secret-tool lookup service ${provider}'
+```
+
 ### Provider Implementation
 
 Each provider file exports two functions:

@@ -18,6 +18,11 @@ typeset -g ZSH_AI_CMD_HIGHLIGHT=${ZSH_AI_CMD_HIGHLIGHT:-'fg=8'}
 # until _zsh_ai_cmd_get_key() runs. Override with a literal name if needed.
 typeset -g ZSH_AI_CMD_KEYCHAIN_NAME=${ZSH_AI_CMD_KEYCHAIN_NAME:-'${provider}-api-key'}
 
+# Custom command for API key retrieval. Uses ${provider} expansion at runtime.
+# If command returns empty/fails, falls back to macOS Keychain.
+# Examples: 'pass ${provider}-api-key', 'secret-tool lookup service ${provider}'
+typeset -g ZSH_AI_CMD_API_KEY_COMMAND=${ZSH_AI_CMD_API_KEY_COMMAND:-''}
+
 # Provider selection (anthropic, openai, gemini, deepseek, ollama)
 typeset -g ZSH_AI_CMD_PROVIDER=${ZSH_AI_CMD_PROVIDER:-'anthropic'}
 
@@ -325,6 +330,38 @@ _zsh_ai_cmd_get_key() {
 
   # Check env var
   [[ -n ${(P)key_var} ]] && return 0
+
+  # Try custom command if configured
+  if [[ -n $ZSH_AI_CMD_API_KEY_COMMAND ]]; then
+    local expanded_command="${(e)ZSH_AI_CMD_API_KEY_COMMAND}"
+
+    [[ $ZSH_AI_CMD_DEBUG == true ]] && {
+      print -- "=== $(date '+%Y-%m-%d %H:%M:%S') [get_key] ===" >> $ZSH_AI_CMD_LOG
+      print -- "provider: $provider" >> $ZSH_AI_CMD_LOG
+      print -- "command: $expanded_command" >> $ZSH_AI_CMD_LOG
+    }
+
+    local key
+    key=$(eval "$expanded_command" 2>/dev/null)
+
+    if [[ $? -eq 0 && -n $key ]]; then
+      # Sanitize command output (security: strip control chars, escapes)
+      key=$(_zsh_ai_cmd_sanitize "$key")
+
+      [[ $ZSH_AI_CMD_DEBUG == true ]] && {
+        print -- "result: success (${#key} chars after sanitization)" >> $ZSH_AI_CMD_LOG
+        print "" >> $ZSH_AI_CMD_LOG
+      }
+
+      typeset -g "$key_var"="$key"
+      return 0
+    else
+      [[ $ZSH_AI_CMD_DEBUG == true ]] && {
+        print -- "result: command failed or returned empty, trying keychain" >> $ZSH_AI_CMD_LOG
+        print "" >> $ZSH_AI_CMD_LOG
+      }
+    fi
+  fi
 
   # Try macOS Keychain
   local key
