@@ -19,22 +19,7 @@ _zsh_ai_cmd_copilot_call() {
       messages: [
         {role: "system", content: $system},
         {role: "user", content: $content}
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "shell_command",
-          schema: {
-            type: "object",
-            properties: {
-              command: {type: "string", description: "The shell command"}
-            },
-            required: ["command"],
-            additionalProperties: false
-          },
-          strict: true
-        }
-      }
+      ]
     }')
 
   local response
@@ -63,7 +48,12 @@ _zsh_ai_cmd_copilot_call() {
   fi
 
   # Extract command from response
-  print -r -- "$response" | command jq -re '.choices[0].message.content | fromjson | .command // empty' 2>/dev/null
+  # Try structured JSON first, fall back to plain text (copilot-api returns plain text)
+  local content
+  content=$(print -r -- "$response" | command jq -re '.choices[0].message.content // empty' 2>/dev/null)
+  if [[ -n $content ]]; then
+    print -r -- "$content" | command jq -re '.command // empty' 2>/dev/null || print -r -- "$content"
+  fi
 }
 
 _zsh_ai_cmd_copilot_key_error() {
