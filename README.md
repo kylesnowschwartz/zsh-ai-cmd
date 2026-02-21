@@ -59,6 +59,7 @@ ZSH_AI_CMD_DEEPSEEK_MODEL='deepseek-chat'
 ZSH_AI_CMD_OLLAMA_MODEL='mistral-small'
 ZSH_AI_CMD_COPILOT_MODEL='gpt-4o'           # Requires copilot-api (npx copilot-api start)
 ZSH_AI_CMD_COPILOT_HOST='localhost:4141'    # copilot-api endpoint
+ZSH_AI_CMD_OPENAI_BASE_URL='https://api.openai.com/v1/chat/completions'  # Custom OpenAI-compatible endpoint
 ```
 
 ## Custom API Key Retrieval

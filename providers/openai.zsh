@@ -2,6 +2,7 @@
 # Uses structured outputs with JSON schema for reliable command extraction
 
 typeset -g ZSH_AI_CMD_OPENAI_MODEL=${ZSH_AI_CMD_OPENAI_MODEL:-'gpt-5.2-2025-12-11'}
+typeset -g ZSH_AI_CMD_OPENAI_BASE_URL=${ZSH_AI_CMD_OPENAI_BASE_URL:-'https://api.openai.com/v1/chat/completions'}
 
 _zsh_ai_cmd_openai_call() {
   local input=$1
@@ -37,7 +38,7 @@ _zsh_ai_cmd_openai_call() {
     }')
 
   local response
-  response=$(command curl -sS --max-time 30 "https://api.openai.com/v1/chat/completions" \
+  response=$(command curl -sS --max-time 30 "$ZSH_AI_CMD_OPENAI_BASE_URL" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $OPENAI_API_KEY" \
     -d "$payload" 2>/dev/null)
