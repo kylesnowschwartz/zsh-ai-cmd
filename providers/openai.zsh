@@ -2,6 +2,7 @@
 # Uses structured outputs with JSON schema for reliable command extraction
 
 typeset -g ZSH_AI_CMD_OPENAI_MODEL=${ZSH_AI_CMD_OPENAI_MODEL:-'gpt-5.2-2025-12-11'}
+# Note: OPENAI_API_KEY is sent as Authorization header to this endpoint
 typeset -g ZSH_AI_CMD_OPENAI_BASE_URL=${ZSH_AI_CMD_OPENAI_BASE_URL:-'https://api.openai.com/v1/chat/completions'}
 
 _zsh_ai_cmd_openai_call() {

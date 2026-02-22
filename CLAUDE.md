@@ -12,14 +12,14 @@ The main plugin lives in @zsh-ai-cmd.plugin.zsh with provider implementations in
 
 ### Supported Providers
 
- | Provider   | File                      | Default Model               | API Key Env Var     |
- | ---------- | ------                    | ---------------             | -----------------   |
- | Anthropic  | `providers/anthropic.zsh` | `claude-haiku-4-5-20251001` | `ANTHROPIC_API_KEY` |
- | OpenAI     | `providers/openai.zsh`    | `gpt-5.2-2025-12-11`        | `OPENAI_API_KEY`    |
- | Gemini     | `providers/gemini.zsh`    | `gemini-3-flash-preview`    | `GEMINI_API_KEY`    |
- | DeepSeek   | `providers/deepseek.zsh`  | `deepseek-chat`             | `DEEPSEEK_API_KEY`  |
- | Ollama     | `providers/ollama.zsh`    | `mistral-small`             | (none - local)      |
- | Copilot    | `providers/copilot.zsh`   | `gpt-4o`                    | (none - local)      |
+ | Provider   | File                      | Default Model               | API Key Env Var     | Custom Endpoint Var           |
+ | ---------- | ------                    | ---------------             | -----------------   | -------------------           |
+ | Anthropic  | `providers/anthropic.zsh` | `claude-haiku-4-5-20251001` | `ANTHROPIC_API_KEY` |                               |
+ | OpenAI     | `providers/openai.zsh`    | `gpt-5.2-2025-12-11`        | `OPENAI_API_KEY`    | `ZSH_AI_CMD_OPENAI_BASE_URL`  |
+ | Gemini     | `providers/gemini.zsh`    | `gemini-3-flash-preview`    | `GEMINI_API_KEY`    |                               |
+ | DeepSeek   | `providers/deepseek.zsh`  | `deepseek-chat`             | `DEEPSEEK_API_KEY`  |                               |
+ | Ollama     | `providers/ollama.zsh`    | `mistral-small`             | (none - local)      | `ZSH_AI_CMD_OLLAMA_HOST`      |
+ | Copilot    | `providers/copilot.zsh`   | `gpt-4o`                    | (none - local)      | `ZSH_AI_CMD_COPILOT_HOST`     |
 
 Set provider via `ZSH_AI_CMD_PROVIDER='openai'` (default: `anthropic`).
 

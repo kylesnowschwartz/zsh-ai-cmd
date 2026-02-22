@@ -54,12 +54,13 @@ ZSH_AI_CMD_API_KEY_COMMAND=''    # Command to get API key, e.g., 'secret-tool lo
 # Provider-specific models (defaults shown)
 ZSH_AI_CMD_ANTHROPIC_MODEL='claude-haiku-4-5-20251001'
 ZSH_AI_CMD_OPENAI_MODEL='gpt-5.2-2025-12-11'
+ZSH_AI_CMD_OPENAI_BASE_URL='https://api.openai.com/v1/chat/completions'  # Custom OpenAI-compatible endpoint
 ZSH_AI_CMD_GEMINI_MODEL='gemini-3-flash-preview'
 ZSH_AI_CMD_DEEPSEEK_MODEL='deepseek-chat'
 ZSH_AI_CMD_OLLAMA_MODEL='mistral-small'
+ZSH_AI_CMD_OLLAMA_HOST='localhost:11434'    # ollama endpoint
 ZSH_AI_CMD_COPILOT_MODEL='gpt-4o'           # Requires copilot-api (npx copilot-api start)
 ZSH_AI_CMD_COPILOT_HOST='localhost:4141'    # copilot-api endpoint
-ZSH_AI_CMD_OPENAI_BASE_URL='https://api.openai.com/v1/chat/completions'  # Custom OpenAI-compatible endpoint
 ```
 
 ## Custom API Key Retrieval
