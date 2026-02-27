@@ -23,7 +23,7 @@ typeset -g ZSH_AI_CMD_KEYCHAIN_NAME=${ZSH_AI_CMD_KEYCHAIN_NAME:-'${provider}-api
 # Examples: 'pass ${provider}-api-key', 'secret-tool lookup service ${provider}'
 typeset -g ZSH_AI_CMD_API_KEY_COMMAND=${ZSH_AI_CMD_API_KEY_COMMAND:-''}
 
-# Provider selection (anthropic, openai, gemini, deepseek, ollama)
+# Provider selection (anthropic, openai, gemini, deepseek, ollama, copilot, openrouter, synthetic, nvidia, cerebras, groq)
 typeset -g ZSH_AI_CMD_PROVIDER=${ZSH_AI_CMD_PROVIDER:-'anthropic'}
 
 # Legacy model variable maps to anthropic model for backwards compatibility
@@ -88,6 +88,11 @@ source "${0:a:h}/providers/ollama.zsh"
 source "${0:a:h}/providers/deepseek.zsh"
 source "${0:a:h}/providers/gemini.zsh"
 source "${0:a:h}/providers/copilot.zsh"
+source "${0:a:h}/providers/openrouter.zsh"
+source "${0:a:h}/providers/synthetic.zsh"
+source "${0:a:h}/providers/nvidia.zsh"
+source "${0:a:h}/providers/cerebras.zsh"
+source "${0:a:h}/providers/groq.zsh"
 
 # ============================================================================
 # Ghost Text Display
@@ -210,6 +215,11 @@ _zsh_ai_cmd_call_api() {
     deepseek)  _zsh_ai_cmd_deepseek_call "$input" "$prompt" ;;
     gemini)    _zsh_ai_cmd_gemini_call "$input" "$prompt" ;;
     copilot)   _zsh_ai_cmd_copilot_call "$input" "$prompt" ;;
+    openrouter) _zsh_ai_cmd_openrouter_call "$input" "$prompt" ;;
+    synthetic) _zsh_ai_cmd_synthetic_call "$input" "$prompt" ;;
+    nvidia)    _zsh_ai_cmd_nvidia_call "$input" "$prompt" ;;
+    cerebras)  _zsh_ai_cmd_cerebras_call "$input" "$prompt" ;;
+    groq)      _zsh_ai_cmd_groq_call "$input" "$prompt" ;;
     *) print -u2 "zsh-ai-cmd: Unknown provider '$ZSH_AI_CMD_PROVIDER'"; return 1 ;;
   esac
 }
@@ -235,7 +245,7 @@ _zsh_ai_cmd_suggest() {
 
   # Animate spinner while waiting
   while kill -0 $pid 2>/dev/null; do
-    POSTDISPLAY=" ${spinner:$((i % 10)):1}"
+    POSTDISPLAY="   ${spinner:$((i % 10)):1}"
     zle -R
     read -t 0.1 -k 1 && { kill $pid 2>/dev/null; POSTDISPLAY=""; rm -f "$tmpfile"; return; }
     ((i++))

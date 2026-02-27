@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 # test-api.sh - Validate API responses for format compliance
-# Usage: ./test-api.sh [--provider anthropic|openai|ollama]
+# Usage: ./test-api.sh [--provider anthropic|openai|ollama|deepseek|gemini|copilot|synthetic|nvidia|cerebras|groq]
 
 set -uo pipefail
 
@@ -11,7 +11,7 @@ typeset -g ZSH_AI_CMD_PROVIDER=${ZSH_AI_CMD_PROVIDER:-'anthropic'}
 while [[ $# -gt 0 ]]; do
   case $1 in
     --provider|-p) ZSH_AI_CMD_PROVIDER=$2; shift 2 ;;
-    --help|-h) print "Usage: $0 [--provider anthropic|openai|ollama|deepseek|gemini|copilot]"; exit 0 ;;
+    --help|-h) print "Usage: $0 [--provider anthropic|openai|ollama|deepseek|gemini|copilot|synthetic|nvidia|cerebras|groq]"; exit 0 ;;
     *) print -u2 "Unknown option: $1"; exit 1 ;;
   esac
 done
@@ -36,6 +36,11 @@ source "${SCRIPT_DIR}/providers/ollama.zsh"
 source "${SCRIPT_DIR}/providers/deepseek.zsh"
 source "${SCRIPT_DIR}/providers/gemini.zsh"
 source "${SCRIPT_DIR}/providers/copilot.zsh"
+source "${SCRIPT_DIR}/providers/synthetic.zsh"
+source "${SCRIPT_DIR}/providers/nvidia.zsh"
+source "${SCRIPT_DIR}/providers/cerebras.zsh"
+source "${SCRIPT_DIR}/providers/groq.zsh"
+source "${SCRIPT_DIR}/providers/openrouter.zsh"
 
 # Get API key for current provider
 get_api_key() {
@@ -128,6 +133,11 @@ PWD: /tmp/test
     deepseek)  _zsh_ai_cmd_deepseek_call "$input" "$prompt" ;;
     gemini)    _zsh_ai_cmd_gemini_call "$input" "$prompt" ;;
     copilot)   _zsh_ai_cmd_copilot_call "$input" "$prompt" ;;
+    synthetic) _zsh_ai_cmd_synthetic_call "$input" "$prompt" ;;
+    nvidia)    _zsh_ai_cmd_nvidia_call "$input" "$prompt" ;;
+    cerebras)  _zsh_ai_cmd_cerebras_call "$input" "$prompt" ;;
+    groq)      _zsh_ai_cmd_groq_call "$input" "$prompt" ;;
+    openrouter) _zsh_ai_cmd_openrouter_call "$input" "$prompt" ;;
     *) print -u2 "Unknown provider: $ZSH_AI_CMD_PROVIDER"; return 1 ;;
   esac
 }
@@ -170,6 +180,11 @@ get_model_name() {
     deepseek)  print "$ZSH_AI_CMD_DEEPSEEK_MODEL" ;;
     gemini)    print "$ZSH_AI_CMD_GEMINI_MODEL" ;;
     copilot)   print "$ZSH_AI_CMD_COPILOT_MODEL" ;;
+    synthetic) print "$ZSH_AI_CMD_SYNTHETIC_MODEL" ;;
+    nvidia)    print "$ZSH_AI_CMD_NVIDIA_MODEL" ;;
+    cerebras)  print "$ZSH_AI_CMD_CEREBRAS_MODEL" ;;
+    groq)      print "$ZSH_AI_CMD_GROQ_MODEL" ;;
+    openrouter) print "$ZSH_AI_CMD_OPENROUTER_MODEL" ;;
   esac
 }
 

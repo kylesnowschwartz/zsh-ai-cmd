@@ -20,6 +20,11 @@ The main plugin lives in @zsh-ai-cmd.plugin.zsh with provider implementations in
  | DeepSeek   | `providers/deepseek.zsh`  | `deepseek-chat`             | `DEEPSEEK_API_KEY`  |                               |
  | Ollama     | `providers/ollama.zsh`    | `mistral-small`             | (none - local)      | `ZSH_AI_CMD_OLLAMA_HOST`      |
  | Copilot    | `providers/copilot.zsh`   | `gpt-4o`                    | (none - local)      | `ZSH_AI_CMD_COPILOT_HOST`     |
+ | OpenRouter | `providers/openrouter.zsh`  | `openai/gpt-oss-120b:free`  | `OPENROUTER_API_KEY`| `ZSH_AI_CMD_OPENROUTER_BASE_URL` |
+ | Synthetic  | `providers/synthetic.zsh`   | `hf:moonshotai/Kimi-K2.5`   | `SYNTHETIC_API_KEY` | `ZSH_AI_CMD_SYNTHETIC_BASE_URL` |
+ | NVIDIA     | `providers/nvidia.zsh`      | `openai/gpt-oss-120b`       | `NVIDIA_API_KEY`    | `ZSH_AI_CMD_NVIDIA_BASE_URL`    |
+ | GROQ       | `providers/groq.zsh`        | `llama-3.3-70b-versatile`   | `GROQ_API_KEY`    | `ZSH_AI_CMD_GROQ_BASE_URL`    |
+ | Cerebras  | `providers/cerebras.zsh`    | `gpt-oss-120b`              | `CEREBRAS_API_KEY` | `ZSH_AI_CMD_CEREBRAS_BASE_URL` |
 
 Set provider via `ZSH_AI_CMD_PROVIDER='openai'` (default: `anthropic`).
 
