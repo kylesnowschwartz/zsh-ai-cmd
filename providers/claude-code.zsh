@@ -12,7 +12,6 @@ _zsh_ai_cmd_claude_code_call() {
 
   local response
   response=$(command claude -p \
-    --bare \
     --no-session-persistence \
     --effort low \
     --model "$ZSH_AI_CMD_CLAUDE_CODE_MODEL" \
