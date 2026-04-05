@@ -14,6 +14,9 @@ _zsh_ai_cmd_claude_code_call() {
   response=$(command claude -p \
     --no-session-persistence \
     --effort low \
+    --disable-slash-commands \
+    --strict-mcp-config \
+    --setting-sources "" \
     --model "$ZSH_AI_CMD_CLAUDE_CODE_MODEL" \
     --tools "" \
     --output-format json \
