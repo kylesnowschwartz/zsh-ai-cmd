@@ -20,10 +20,13 @@ The main plugin lives in @zsh-ai-cmd.plugin.zsh with provider implementations in
  | DeepSeek   | `providers/deepseek.zsh`  | `deepseek-chat`             | `DEEPSEEK_API_KEY`  |                               |
  | Ollama     | `providers/ollama.zsh`    | `mistral-small`             | (none - local)      | `ZSH_AI_CMD_OLLAMA_HOST`      |
  | Copilot    | `providers/copilot.zsh`   | `gpt-4o`                    | (none - local)      | `ZSH_AI_CMD_COPILOT_HOST`     |
+ | Claude Code | `providers/claude-code.zsh` | (CLI default)            | (none - subscription) |                             |
 
 Set provider via `ZSH_AI_CMD_PROVIDER='openai'` (default: `anthropic`).
 
 **Note:** Copilot requires [copilot-api](https://github.com/ericc-ch/copilot-api) to be running. Install and start with `npx copilot-api start`.
+
+**Note:** Claude Code uses your Claude subscription (Max/Pro/Enterprise) via the [Claude Code CLI](https://github.com/anthropics/claude-code). Install with `npm install -g @anthropic-ai/claude-code` and authenticate with `claude login`. Slower than direct API providers (~5s vs ~1-3s) due to CLI startup overhead.
 
 ### API Key Retrieval
 

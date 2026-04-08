@@ -6,7 +6,7 @@ Natural language to shell commands with ghost text preview.
 
 ## Install
 
-Requires `curl`, `jq`, and an API key for your chosen provider.
+Requires `curl`, `jq`, and an API key for your chosen provider (or a Claude subscription for the `claude-code` provider).
 
 ```sh
 # Clone
@@ -16,7 +16,7 @@ git clone https://github.com/kylesnowschwartz/zsh-ai-cmd ~/.zsh-ai-cmd
 source ~/.zsh-ai-cmd/zsh-ai-cmd.plugin.zsh
 
 # Choose your provider (default: anthropic)
-export ZSH_AI_CMD_PROVIDER='anthropic'  # or: openai, gemini, deepseek, ollama, copilot
+export ZSH_AI_CMD_PROVIDER='anthropic'  # or: openai, gemini, deepseek, ollama, copilot, claude-code
 
 # Set API key for your chosen provider
 export ANTHROPIC_API_KEY='sk-ant-...'
@@ -24,6 +24,7 @@ export OPENAI_API_KEY='sk-...'
 export GEMINI_API_KEY='...'
 export DEEPSEEK_API_KEY='sk-...'
 # Ollama and Copilot need no key (local services)
+# Claude Code uses your existing Claude subscription (requires: npm install -g @anthropic-ai/claude-code && claude login)
 
 # Or use macOS Keychain
 security add-generic-password -s 'anthropic-api-key' -a "$USER" -w 'sk-ant-...'
@@ -39,7 +40,7 @@ security add-generic-password -s 'anthropic-api-key' -a "$USER" -w 'sk-ant-...'
 ## Configuration
 
 ```sh
-ZSH_AI_CMD_PROVIDER='anthropic'              # Provider: anthropic, openai, gemini, deepseek, ollama, copilot
+ZSH_AI_CMD_PROVIDER='anthropic'              # Provider: anthropic, openai, gemini, deepseek, ollama, copilot, claude-code
 ZSH_AI_CMD_KEY='^z'                          # Trigger key (default: Ctrl+Z)
 ZSH_AI_CMD_HIGHLIGHT='fg=8'                  # Ghost text style (zsh region_highlight format)
 ZSH_AI_CMD_DEBUG=false                       # Enable debug logging
@@ -61,6 +62,7 @@ ZSH_AI_CMD_OLLAMA_MODEL='mistral-small'
 ZSH_AI_CMD_OLLAMA_HOST='localhost:11434'    # ollama endpoint
 ZSH_AI_CMD_COPILOT_MODEL='gpt-4o'           # Requires copilot-api (npx copilot-api start)
 ZSH_AI_CMD_COPILOT_HOST='localhost:4141'    # copilot-api endpoint
+ZSH_AI_CMD_CLAUDE_CODE_MODEL=''             # Requires Claude Code CLI (claude login); empty = CLI default
 ```
 
 ## Custom API Key Retrieval
@@ -98,6 +100,8 @@ export ZSH_AI_CMD_API_KEY_COMMAND='aws secretsmanager get-secret-value --secret-
 All providers pass the test suite (19/19). Full output comparison:
 
 **Note:** Copilot provider requires [copilot-api](https://github.com/ericc-ch/copilot-api) to be running locally. Install and start with `npx copilot-api start`.
+
+**Note:** Claude Code provider uses your existing Claude subscription (Max/Pro/Enterprise) instead of an API key. Requires [Claude Code CLI](https://github.com/anthropics/claude-code): `npm install -g @anthropic-ai/claude-code && claude login`. Responses are slower (~5s) than direct API providers (~1-3s) due to CLI startup overhead.
 
 <details>
 <summary>Click to expand full comparison table</summary>

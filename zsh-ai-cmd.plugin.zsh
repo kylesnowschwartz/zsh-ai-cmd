@@ -88,6 +88,7 @@ source "${0:a:h}/providers/ollama.zsh"
 source "${0:a:h}/providers/deepseek.zsh"
 source "${0:a:h}/providers/gemini.zsh"
 source "${0:a:h}/providers/copilot.zsh"
+source "${0:a:h}/providers/claude-code.zsh"
 
 # ============================================================================
 # Ghost Text Display
@@ -209,7 +210,8 @@ _zsh_ai_cmd_call_api() {
     ollama)    _zsh_ai_cmd_ollama_call "$input" "$prompt" ;;
     deepseek)  _zsh_ai_cmd_deepseek_call "$input" "$prompt" ;;
     gemini)    _zsh_ai_cmd_gemini_call "$input" "$prompt" ;;
-    copilot)   _zsh_ai_cmd_copilot_call "$input" "$prompt" ;;
+    copilot)     _zsh_ai_cmd_copilot_call "$input" "$prompt" ;;
+    claude-code) _zsh_ai_cmd_claude_code_call "$input" "$prompt" ;;
     *) print -u2 "zsh-ai-cmd: Unknown provider '$ZSH_AI_CMD_PROVIDER'"; return 1 ;;
   esac
 }
@@ -322,8 +324,8 @@ fi
 _zsh_ai_cmd_get_key() {
   local provider="${(L)ZSH_AI_CMD_PROVIDER}"  # Normalize provider to lowercase
 
-  # Ollama and Copilot don't need a key
-  [[ $provider == ollama || $provider == copilot ]] && return 0
+  # Ollama, Copilot, and Claude Code don't need a key
+  [[ $provider == ollama || $provider == copilot || $provider == claude-code ]] && return 0
 
   local key_var="${(U)provider}_API_KEY"
   local keychain_name="${(e)ZSH_AI_CMD_KEYCHAIN_NAME}"
