@@ -2,6 +2,40 @@
 
 All notable changes to zsh-ai-cmd are documented in this file.
 
+## [v0.2.0] - 2026-04-08
+
+### Added
+- **Claude Code Provider** (`ZSH_AI_CMD_PROVIDER='claude-code'`)
+  - Use your Claude subscription (Max/Pro/Enterprise) instead of an API key
+  - Routes through the Claude Code CLI (`claude -p`) in pipe mode
+  - No API key required — authenticates via `claude login`
+  - Optimized startup flags cut latency from ~8s to ~3-5s per call
+  - Uses CLI's default model; override with `ZSH_AI_CMD_CLAUDE_CODE_MODEL`
+  - Text output mode for faster responses (matches copilot provider approach)
+
+### Configuration
+```sh
+export ZSH_AI_CMD_PROVIDER='claude-code'
+
+# Optional: pin a specific model (empty = CLI default)
+export ZSH_AI_CMD_CLAUDE_CODE_MODEL='haiku'
+```
+
+### Performance Notes
+Slower than direct API providers (~3-5s vs ~1-3s) due to CLI startup overhead.
+Best suited for users who prefer using their existing Claude subscription over
+separate API billing.
+
+### Testing
+- All 19 API validation tests pass with claude-code provider
+- Added claude-code to test-api.sh test suite
+- Updated README.md and CLAUDE.md with provider documentation
+
+### Credits
+Thanks to @ohare93 for the original implementation in #12 and #17.
+
+---
+
 ## [v0.1.0] - 2026-01-26
 
 ### Added
