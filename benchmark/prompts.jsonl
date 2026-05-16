@@ -1,0 +1,100 @@
+{"id":1,"prompt":"show my ip address","expected":"ifconfig","category":"simple","tags":["network"]}
+{"id":2,"prompt":"list all files in current directory","expected":"ls","category":"simple","tags":["files"]}
+{"id":3,"prompt":"show disk usage","expected":"df -h","category":"simple","tags":["disk"]}
+{"id":4,"prompt":"show current date","expected":"date","category":"simple","tags":["system"]}
+{"id":5,"prompt":"print working directory","expected":"pwd","category":"simple","tags":["files"]}
+{"id":6,"prompt":"show all environment variables","expected":"env","category":"simple","tags":["system"]}
+{"id":7,"prompt":"clear the terminal","expected":"clear","category":"simple","tags":["system"]}
+{"id":8,"prompt":"show who is logged in","expected":"who","category":"simple","tags":["system"]}
+{"id":9,"prompt":"show system uptime","expected":"uptime","category":"simple","tags":["system"]}
+{"id":10,"prompt":"show calendar","expected":"cal","category":"simple","tags":["system"]}
+{"id":11,"prompt":"find files changed in the last hour","expected":"find . -mmin -60","category":"flags","tags":["find","time"]}
+{"id":12,"prompt":"find files larger than 100mb","expected":"find . -size +100M","category":"flags","tags":["find","size"]}
+{"id":13,"prompt":"find all png files","expected":"find . -name '*.png'","category":"flags","tags":["find","name"]}
+{"id":14,"prompt":"find empty directories","expected":"find . -type d -empty","category":"flags","tags":["find"]}
+{"id":15,"prompt":"find files modified in the last 7 days","expected":"find . -mtime -7","category":"flags","tags":["find","time"]}
+{"id":16,"prompt":"find files modified today","expected":"find . -mtime -1","category":"flags","tags":["find","time"]}
+{"id":17,"prompt":"find and delete all .DS_Store files","expected":"find . -name '.DS_Store' -delete","category":"flags","tags":["find","delete"]}
+{"id":18,"prompt":"find all symlinks","expected":"find . -type l","category":"flags","tags":["find"]}
+{"id":19,"prompt":"find files owned by root","expected":"find / -user root","category":"flags","tags":["find","permissions"]}
+{"id":20,"prompt":"find all directories named node_modules","expected":"find . -type d -name node_modules","category":"flags","tags":["find","name"]}
+{"id":21,"prompt":"count lines in all python files","expected":"find . -name '*.py' -exec wc -l {} +","category":"composed","tags":["find","wc"]}
+{"id":22,"prompt":"show folder sizes sorted by size","expected":"du -sh * | sort -hr","category":"composed","tags":["du","sort"]}
+{"id":23,"prompt":"kill the process using port 3000","expected":"kill $(lsof -t -i :3000)","category":"composed","tags":["process","lsof"]}
+{"id":24,"prompt":"find large files over 1gb","expected":"find . -size +1G","category":"flags","tags":["find","size"]}
+{"id":25,"prompt":"search for TODO in all javascript files","expected":"grep -rn 'TODO' --include='*.js'","category":"flags","tags":["grep"]}
+{"id":26,"prompt":"show the 10 biggest files in current directory","expected":"du -ah . | sort -rh | head -10","category":"composed","tags":["du","sort","head"]}
+{"id":27,"prompt":"compress this folder into a tar.gz","expected":"tar czf archive.tar.gz .","category":"flags","tags":["tar"]}
+{"id":28,"prompt":"extract a tar.gz file","expected":"tar xzf file.tar.gz","category":"flags","tags":["tar"]}
+{"id":29,"prompt":"show git branches sorted by last commit date","expected":"git branch --sort=-committerdate","category":"flags","tags":["git"]}
+{"id":30,"prompt":"show git log with one line per commit","expected":"git log --oneline","category":"flags","tags":["git"]}
+{"id":31,"prompt":"show the diff of staged changes","expected":"git diff --staged","category":"flags","tags":["git"]}
+{"id":32,"prompt":"undo the last git commit but keep changes","expected":"git reset --soft HEAD~1","category":"flags","tags":["git"]}
+{"id":33,"prompt":"show which git commits are not pushed yet","expected":"git log origin/main..HEAD","category":"composed","tags":["git"]}
+{"id":34,"prompt":"rename a git branch","expected":"git branch -m old new","category":"flags","tags":["git"]}
+{"id":35,"prompt":"delete all merged git branches","expected":"git branch --merged | grep -v main | xargs git branch -d","category":"composed","tags":["git"]}
+{"id":36,"prompt":"show network connections","expected":"netstat -an","category":"simple","tags":["network"]}
+{"id":37,"prompt":"show what process is using port 8080","expected":"lsof -i :8080","category":"flags","tags":["lsof","network"]}
+{"id":38,"prompt":"download a file from a url","expected":"curl -O https://example.com/file","category":"flags","tags":["curl"]}
+{"id":39,"prompt":"show http headers of a url","expected":"curl -I https://example.com","category":"flags","tags":["curl"]}
+{"id":40,"prompt":"make a POST request with json body","expected":"curl -X POST -H 'Content-Type: application/json' -d '{}'","category":"flags","tags":["curl"]}
+{"id":41,"prompt":"watch a log file in real time","expected":"tail -f logfile","category":"flags","tags":["tail"]}
+{"id":42,"prompt":"show the last 50 lines of a file","expected":"tail -n 50 file","category":"flags","tags":["tail"]}
+{"id":43,"prompt":"count number of files in current directory","expected":"ls | wc -l","category":"composed","tags":["ls","wc"]}
+{"id":44,"prompt":"replace all tabs with spaces in a file","expected":"sed -i '' 's/\\t/    /g' file","category":"flags","tags":["sed"]}
+{"id":45,"prompt":"show only unique lines in a file","expected":"sort file | uniq","category":"composed","tags":["sort","uniq"]}
+{"id":46,"prompt":"compare two files","expected":"diff file1 file2","category":"simple","tags":["diff"]}
+{"id":47,"prompt":"copy a directory recursively","expected":"cp -r src dst","category":"flags","tags":["cp"]}
+{"id":48,"prompt":"create a directory and all parent directories","expected":"mkdir -p path/to/dir","category":"flags","tags":["mkdir"]}
+{"id":49,"prompt":"change file permissions to executable","expected":"chmod +x file","category":"flags","tags":["chmod"]}
+{"id":50,"prompt":"show file permissions in octal","expected":"stat -f '%A' file","category":"flags","tags":["stat"]}
+{"id":51,"prompt":"find duplicate files by checksum","expected":"find . -type f -exec md5 {} + | sort | uniq -d","category":"composed","tags":["find","md5"]}
+{"id":52,"prompt":"monitor cpu and memory usage","expected":"top","category":"simple","tags":["system"]}
+{"id":53,"prompt":"show memory usage","expected":"vm_stat","category":"simple","tags":["system","macos"]}
+{"id":54,"prompt":"list all running processes","expected":"ps aux","category":"flags","tags":["ps"]}
+{"id":55,"prompt":"kill a process by name","expected":"pkill processname","category":"simple","tags":["process"]}
+{"id":56,"prompt":"show dns records for a domain","expected":"dig example.com","category":"simple","tags":["network"]}
+{"id":57,"prompt":"test if a port is open on a host","expected":"nc -zv host 80","category":"flags","tags":["network"]}
+{"id":58,"prompt":"generate a random password","expected":"openssl rand -base64 32","category":"flags","tags":["security"]}
+{"id":59,"prompt":"calculate md5 checksum of a file","expected":"md5 file","category":"simple","tags":["macos"]}
+{"id":60,"prompt":"calculate sha256 checksum of a file","expected":"shasum -a 256 file","category":"flags","tags":["macos"]}
+{"id":61,"prompt":"open current directory in Finder","expected":"open .","category":"simple","tags":["macos"]}
+{"id":62,"prompt":"copy output to clipboard","expected":"pbcopy","category":"simple","tags":["macos"]}
+{"id":63,"prompt":"paste from clipboard","expected":"pbpaste","category":"simple","tags":["macos"]}
+{"id":64,"prompt":"search files by content using spotlight","expected":"mdfind content","category":"simple","tags":["macos"]}
+{"id":65,"prompt":"prevent mac from sleeping","expected":"caffeinate","category":"simple","tags":["macos"]}
+{"id":66,"prompt":"say something out loud","expected":"say hello","category":"simple","tags":["macos"]}
+{"id":67,"prompt":"show battery status","expected":"pmset -g batt","category":"flags","tags":["macos"]}
+{"id":68,"prompt":"flush dns cache","expected":"sudo dscacheutil -flushcache","category":"composed","tags":["macos","network"]}
+{"id":69,"prompt":"list all brew packages","expected":"brew list","category":"simple","tags":["macos"]}
+{"id":70,"prompt":"show wifi network name","expected":"networksetup -getairportnetwork en0","category":"flags","tags":["macos","network"]}
+{"id":71,"prompt":"print first column of a csv","expected":"awk -F, '{print $1}' file.csv","category":"flags","tags":["awk"]}
+{"id":72,"prompt":"sum numbers in a file","expected":"awk '{s+=$1} END {print s}' file","category":"flags","tags":["awk"]}
+{"id":73,"prompt":"replace a string in all files recursively","expected":"find . -type f -exec sed -i '' 's/old/new/g' {} +","category":"composed","tags":["find","sed"]}
+{"id":74,"prompt":"show lines that appear in both files","expected":"comm -12 <(sort file1) <(sort file2)","category":"composed","tags":["comm","sort"]}
+{"id":75,"prompt":"convert image to different format","expected":"sips -s format png input.jpg --out output.png","category":"flags","tags":["macos","image"]}
+{"id":76,"prompt":"resize an image to 800px wide","expected":"sips --resampleWidth 800 image.jpg","category":"flags","tags":["macos","image"]}
+{"id":77,"prompt":"record terminal session","expected":"script session.log","category":"simple","tags":["system"]}
+{"id":78,"prompt":"run a command every 5 seconds","expected":"while true; do command; sleep 5; done","category":"composed","tags":["loop"]}
+{"id":79,"prompt":"show which shell I am using","expected":"echo $SHELL","category":"simple","tags":["system"]}
+{"id":80,"prompt":"create a symbolic link","expected":"ln -s target link","category":"flags","tags":["files"]}
+{"id":81,"prompt":"show all listening ports","expected":"lsof -i -P -n | grep LISTEN","category":"composed","tags":["network","lsof"]}
+{"id":82,"prompt":"find processes using more than 50% cpu","expected":"ps aux | awk '$3 > 50'","category":"composed","tags":["ps","awk"]}
+{"id":83,"prompt":"show git stash list","expected":"git stash list","category":"simple","tags":["git"]}
+{"id":84,"prompt":"cherry pick a commit","expected":"git cherry-pick HASH","category":"simple","tags":["git"]}
+{"id":85,"prompt":"show file size in human readable format","expected":"ls -lh file","category":"flags","tags":["ls"]}
+{"id":86,"prompt":"find all files with permission 777","expected":"find . -perm 777","category":"flags","tags":["find","permissions"]}
+{"id":87,"prompt":"show the first 20 lines of a file","expected":"head -n 20 file","category":"flags","tags":["head"]}
+{"id":88,"prompt":"ssh into a server with a specific key","expected":"ssh -i key.pem user@host","category":"flags","tags":["ssh"]}
+{"id":89,"prompt":"rsync a directory to remote server","expected":"rsync -avz src/ user@host:dst/","category":"flags","tags":["rsync"]}
+{"id":90,"prompt":"show crontab entries","expected":"crontab -l","category":"flags","tags":["system"]}
+{"id":91,"prompt":"find text in files ignoring case","expected":"grep -ri pattern .","category":"flags","tags":["grep"]}
+{"id":92,"prompt":"show number of lines words and characters in a file","expected":"wc file","category":"simple","tags":["wc"]}
+{"id":93,"prompt":"create a zip file from a directory","expected":"zip -r archive.zip directory","category":"flags","tags":["zip"]}
+{"id":94,"prompt":"unzip a file to specific directory","expected":"unzip file.zip -d directory","category":"flags","tags":["zip"]}
+{"id":95,"prompt":"show system hardware info","expected":"system_profiler SPHardwareDataType","category":"simple","tags":["macos","system"]}
+{"id":96,"prompt":"list all usb devices","expected":"system_profiler SPUSBDataType","category":"simple","tags":["macos","system"]}
+{"id":97,"prompt":"convert unix timestamp to date","expected":"date -r 1700000000","category":"flags","tags":["date"]}
+{"id":98,"prompt":"show file creation date on macos","expected":"stat -f '%B' file | xargs date -r","category":"composed","tags":["macos","stat"]}
+{"id":99,"prompt":"base64 encode a string","expected":"echo -n 'string' | base64","category":"composed","tags":["encoding"]}
+{"id":100,"prompt":"show all environment variables containing PATH","expected":"env | grep PATH","category":"composed","tags":["system"]}

@@ -1,0 +1,100 @@
+{"id": 1, "prompt": "show my ip address", "result": "curl -s ifconfig.me", "total_time": 2.16}
+{"id": 2, "prompt": "list all files in current directory", "result": "ls -la", "total_time": 4.22}
+{"id": 3, "prompt": "show disk usage", "result": "command du -h -d 1 | sort -hr | head -20", "total_time": 2.52}
+{"id": 4, "prompt": "show current date", "result": "command date", "total_time": 2.72}
+{"id": 5, "prompt": "print working directory", "result": "command pwd", "total_time": 6.8}
+{"id": 6, "prompt": "show all environment variables", "result": "command env", "total_time": 2.27}
+{"id": 7, "prompt": "clear the terminal", "result": "command clear", "total_time": 2.08}
+{"id": 8, "prompt": "show who is logged in", "result": "command who", "total_time": 2.2}
+{"id": 9, "prompt": "show system uptime", "result": "command uptime", "total_time": 2.72}
+{"id": 10, "prompt": "show calendar", "result": "cal", "total_time": 2.27}
+{"id": 11, "prompt": "find files changed in the last hour", "result": "find . -type f -mmin -60 -maxdepth 3 2>/dev/null", "total_time": 2.53}
+{"id": 12, "prompt": "find files larger than 100mb", "result": "find . -type f -size +100M -exec ls -lh {} + 2>/dev/null", "total_time": 2.49}
+{"id": 13, "prompt": "find all png files", "result": "find . -type f -name '*.png' 2>/dev/null", "total_time": 1.71}
+{"id": 14, "prompt": "find empty directories", "result": "find . -type d -empty -maxdepth 3 2>/dev/null", "total_time": 3.11}
+{"id": 15, "prompt": "find files modified in the last 7 days", "result": "find . -type f -mtime -7 -maxdepth 3 2>/dev/null", "total_time": 2.55}
+{"id": 16, "prompt": "find files modified today", "result": "find . -type f -mtime -1 -maxdepth 3 2>/dev/null", "total_time": 2.31}
+{"id": 17, "prompt": "find and delete all .DS_Store files", "result": "find . -name '.DS_Store' -type f -delete 2>/dev/null", "total_time": 2.3}
+{"id": 18, "prompt": "find all symlinks", "result": "find . -type l -maxdepth 3 2>/dev/null", "total_time": 3.37}
+{"id": 19, "prompt": "find files owned by root", "result": "find . -user root -maxdepth 3 2>/dev/null", "total_time": 2.89}
+{"id": 20, "prompt": "find all directories named node_modules", "result": "find . -type d -name node_modules -maxdepth 10 2>/dev/null", "total_time": 2.49}
+{"id": 21, "prompt": "count lines in all python files", "result": "find . -name '*.py' -exec cat {} + 2>/dev/null | wc -l", "total_time": 1.83}
+{"id": 22, "prompt": "show folder sizes sorted by size", "result": "command du -h -d 1 | sort -hr | head -20", "total_time": 2.61}
+{"id": 23, "prompt": "kill the process using port 3000", "result": "command lsof -ti:3000 | xargs kill -9", "total_time": 1.82}
+{"id": 24, "prompt": "find large files over 1gb", "result": "find / -type f -size +1G -exec ls -lh {} + 2>/dev/null | head -20", "total_time": 4.03}
+{"id": 25, "prompt": "search for TODO in all javascript files", "result": "grep -r \"TODO\" --include=\"*.js\" . 2>/dev/null", "total_time": 2.52}
+{"id": 26, "prompt": "show the 10 biggest files in current directory", "result": "find . -type f -maxdepth 1 -exec stat -f \"%z %N\" {} + 2>/dev/null | sort -rn | head -10", "total_time": 2.48}
+{"id": 27, "prompt": "compress this folder into a tar.gz", "result": "tar -czf \"$(basename \"$PWD\").tar.gz\" -C .. \"$(basename \"$PWD\")\"", "total_time": 4.77}
+{"id": 28, "prompt": "extract a tar.gz file", "result": "tar -xzf *.tar.gz", "total_time": 1.76}
+{"id": 29, "prompt": "show git branches sorted by last commit date", "result": "git branch -a --sort=-committerdate --format='%(committerdate:relative)\t%(refname:short)'", "total_time": 2.63}
+{"id": 30, "prompt": "show git log with one line per commit", "result": "git log --oneline", "total_time": 2.23}
+{"id": 31, "prompt": "show the diff of staged changes", "result": "git diff --cached", "total_time": 3.44}
+{"id": 32, "prompt": "undo the last git commit but keep changes", "result": "git reset --soft HEAD~1", "total_time": 2.18}
+{"id": 33, "prompt": "show which git commits are not pushed yet", "result": "git log --oneline @{u}..HEAD", "total_time": 2.33}
+{"id": 34, "prompt": "rename a git branch", "result": "git branch -m old-name new-name", "total_time": 2.11}
+{"id": 35, "prompt": "delete all merged git branches", "result": "git branch --merged | grep -v '\\*\\|main\\|master' | xargs git branch -d", "total_time": 4.16}
+{"id": 36, "prompt": "show network connections", "result": "netstat -an", "total_time": 2.62}
+{"id": 37, "prompt": "show what process is using port 8080", "result": "command lsof -i :8080", "total_time": 2.94}
+{"id": 38, "prompt": "download a file from a url", "result": "curl -LO \"https://example.com/file\"", "total_time": 2.4}
+{"id": 39, "prompt": "show http headers of a url", "result": "curl -I https://example.com", "total_time": 1.88}
+{"id": 40, "prompt": "make a POST request with json body", "result": "curl -X POST -H 'Content-Type: application/json' -d '{\"key\":\"value\"}' http://example.com", "total_time": 2.16}
+{"id": 41, "prompt": "watch a log file in real time", "result": "tail -f /var/log/system.log", "total_time": 2.48}
+{"id": 42, "prompt": "show the last 50 lines of a file", "result": "tail -n 50 file.txt", "total_time": 4.04}
+{"id": 43, "prompt": "count number of files in current directory", "result": "ls -1A | wc -l", "total_time": 2.34}
+{"id": 44, "prompt": "replace all tabs with spaces in a file", "result": "expand -t 4 file.txt > file.txt.tmp && mv file.txt.tmp file.txt", "total_time": 2.64}
+{"id": 45, "prompt": "show only unique lines in a file", "result": "command sort -u file.txt", "total_time": 2.32}
+{"id": 46, "prompt": "compare two files", "result": "command diff file1.txt file2.txt", "total_time": 1.61}
+{"id": 47, "prompt": "copy a directory recursively", "result": "cp -R", "total_time": 2.54}
+{"id": 48, "prompt": "create a directory and all parent directories", "result": "mkdir -p path/to/directory", "total_time": 2.0}
+{"id": 49, "prompt": "change file permissions to executable", "result": "chmod +x *", "total_time": 3.16}
+{"id": 50, "prompt": "show file permissions in octal", "result": "stat -f '%A %N' * 2>/dev/null", "total_time": 2.5}
+{"id": 51, "prompt": "find duplicate files by checksum", "result": "find . -type f -maxdepth 3 -exec md5 -r {} + 2>/dev/null | sort | awk '{print $1}' | uniq -d | while read h; do grep \"^$h\" <(find . -type f -maxdepth 3 -exec md5 -r {} + 2>/dev/null | sort); done", "total_time": 3.53}
+{"id": 52, "prompt": "monitor cpu and memory usage", "result": "top -l 0 -s 2", "total_time": 2.42}
+{"id": 53, "prompt": "show memory usage", "result": "vm_stat | head -10", "total_time": 2.4}
+{"id": 54, "prompt": "list all running processes", "result": "command ps aux", "total_time": 2.46}
+{"id": 55, "prompt": "kill a process by name", "result": "pkill -f", "total_time": 2.63}
+{"id": 56, "prompt": "show dns records for a domain", "result": "dig example.com ANY +noall +answer", "total_time": 2.52}
+{"id": 57, "prompt": "test if a port is open on a host", "result": "nc -z -w 5 localhost 80 && echo 'open' || echo 'closed'", "total_time": 2.89}
+{"id": 58, "prompt": "generate a random password", "result": "LC_ALL=C command tr -dc 'A-Za-z0-9!@#$%^&*' < /dev/urandom | head -c 20; echo", "total_time": 2.75}
+{"id": 59, "prompt": "calculate md5 checksum of a file", "result": "md5 file", "total_time": 1.94}
+{"id": 60, "prompt": "calculate sha256 checksum of a file", "result": "shasum -a 256 file", "total_time": 2.81}
+{"id": 61, "prompt": "open current directory in Finder", "result": "open .", "total_time": 2.4}
+{"id": 62, "prompt": "copy output to clipboard", "result": "pbcopy", "total_time": 2.32}
+{"id": 63, "prompt": "paste from clipboard", "result": "pbpaste", "total_time": 2.55}
+{"id": 64, "prompt": "search files by content using spotlight", "result": "mdfind -onlyin . \"kMDItemTextContent == '*search_term*'\"", "total_time": 2.83}
+{"id": 65, "prompt": "prevent mac from sleeping", "result": "caffeinate -d", "total_time": 2.29}
+{"id": 66, "prompt": "say something out loud", "result": "say 'Hello there!'", "total_time": 2.45}
+{"id": 67, "prompt": "show battery status", "result": "pmset -g batt", "total_time": 1.7}
+{"id": 68, "prompt": "flush dns cache", "result": "sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder", "total_time": 2.54}
+{"id": 69, "prompt": "list all brew packages", "result": "brew list", "total_time": 1.72}
+{"id": 70, "prompt": "show wifi network name", "result": "networksetup -getairportnetwork en0", "total_time": 2.22}
+{"id": 71, "prompt": "print first column of a csv", "result": "command cut -d, -f1 *.csv", "total_time": 2.82}
+{"id": 72, "prompt": "sum numbers in a file", "result": "paste -sd+ numbers.txt | bc", "total_time": 2.42}
+{"id": 73, "prompt": "replace a string in all files recursively", "result": "find . -type f -exec sed -i '' 's/old_string/new_string/g' {} +", "total_time": 1.84}
+{"id": 74, "prompt": "show lines that appear in both files", "result": "comm -12 <(sort file1.txt) <(sort file2.txt)", "total_time": 2.44}
+{"id": 75, "prompt": "convert image to different format", "result": "sips -s format png input.jpg --out output.png", "total_time": 2.34}
+{"id": 76, "prompt": "resize an image to 800px wide", "result": "sips --resizeWidth 800 *.jpg", "total_time": 2.43}
+{"id": 77, "prompt": "record terminal session", "result": "script typescript", "total_time": 2.58}
+{"id": 78, "prompt": "run a command every 5 seconds", "result": "while true; do echo '--- Run at' $(date) '---'; sleep 5; done", "total_time": 2.52}
+{"id": 79, "prompt": "show which shell I am using", "result": "echo $SHELL", "total_time": 2.43}
+{"id": 80, "prompt": "create a symbolic link", "result": "ln -s /path/to/target /path/to/link", "total_time": 2.4}
+{"id": 81, "prompt": "show all listening ports", "result": "command lsof -iTCP -sTCP:LISTEN -nP", "total_time": 2.45}
+{"id": 82, "prompt": "find processes using more than 50% cpu", "result": "command ps -arceo pid,pcpu,comm | awk 'NR==1 || $2>50.0'", "total_time": 3.0}
+{"id": 83, "prompt": "show git stash list", "result": "git stash list", "total_time": 2.18}
+{"id": 84, "prompt": "cherry pick a commit", "result": "git cherry-pick", "total_time": 3.39}
+{"id": 85, "prompt": "show file size in human readable format", "result": "ls -lh", "total_time": 5.24}
+{"id": 86, "prompt": "find all files with permission 777", "result": "find / -type f -perm 777 -maxdepth 5 2>/dev/null | head -20", "total_time": 2.12}
+{"id": 87, "prompt": "show the first 20 lines of a file", "result": "command head -20 file", "total_time": 2.28}
+{"id": 88, "prompt": "ssh into a server with a specific key", "result": "ssh -i ~/.ssh/id_rsa user@hostname", "total_time": 2.33}
+{"id": 89, "prompt": "rsync a directory to remote server", "result": "rsync -avz --progress /tmp/directory/ user@remote-server:/path/to/destination/", "total_time": 2.3}
+{"id": 90, "prompt": "show crontab entries", "result": "command crontab -l", "total_time": 2.24}
+{"id": 91, "prompt": "find text in files ignoring case", "result": "grep -ri '' . --include='*' 2>/dev/null | head -50", "total_time": 3.37}
+{"id": 92, "prompt": "show number of lines words and characters in a file", "result": "command wc /tmp/*", "total_time": 2.05}
+{"id": 93, "prompt": "create a zip file from a directory", "result": "zip -r archive.zip directory/", "total_time": 2.28}
+{"id": 94, "prompt": "unzip a file to specific directory", "result": "unzip file.zip -d /path/to/directory", "total_time": 2.43}
+{"id": 95, "prompt": "show system hardware info", "result": "system_profiler SPHardwareDataType", "total_time": 2.58}
+{"id": 96, "prompt": "list all usb devices", "result": "system_profiler SPUSBDataType", "total_time": 2.34}
+{"id": 97, "prompt": "convert unix timestamp to date", "result": "command date -r 1700000000", "total_time": 2.79}
+{"id": 98, "prompt": "show file creation date on macos", "result": "stat -f \"Created: %SB  File: %N\" -t \"%Y-%m-%d %H:%M:%S\" *", "total_time": 3.31}
+{"id": 99, "prompt": "base64 encode a string", "result": "echo -n 'string' | base64", "total_time": 2.69}
+{"id": 100, "prompt": "show all environment variables containing PATH", "result": "command env | grep PATH", "total_time": 2.26}

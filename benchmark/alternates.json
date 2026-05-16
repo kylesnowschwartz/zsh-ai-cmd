@@ -1,0 +1,621 @@
+{
+  "1": [
+    "ifconfig",
+    "ipconfig getifaddr en0",
+    "ifconfig | grep inet",
+    "networksetup -getinfo Wi-Fi",
+    "ifconfig en0"
+  ],
+  "2": [
+    "ls",
+    "ls -la",
+    "ls -a",
+    "ls -l",
+    "ls -1",
+    "ls ."
+  ],
+  "3": [
+    "df -h",
+    "df",
+    "df -H"
+  ],
+  "4": [
+    "date",
+    "date '+%Y-%m-%d'",
+    "date +%Y-%m-%dT%H:%M:%SZ"
+  ],
+  "5": [
+    "pwd",
+    "echo $PWD"
+  ],
+  "6": [
+    "env",
+    "printenv",
+    "export"
+  ],
+  "7": [
+    "clear",
+    "printf '\\033c'"
+  ],
+  "8": [
+    "who",
+    "w",
+    "users"
+  ],
+  "9": [
+    "uptime"
+  ],
+  "10": [
+    "cal",
+    "ncal"
+  ],
+  "11": [
+    "find . -mmin -60",
+    "find . -type f -mmin -60",
+    "find -mmin -60"
+  ],
+  "12": [
+    "find . -size +100M",
+    "find . -type f -size +100M",
+    "find -size +100M",
+    "find . -maxdepth 1 -size +100M"
+  ],
+  "13": [
+    "find . -name '*.png'",
+    "find . -name \"*.png\"",
+    "find . -iname '*.png'",
+    "find . -type f -name '*.png'",
+    "find . -type f -name \"*.png\""
+  ],
+  "14": [
+    "find . -type d -empty",
+    "find -type d -empty",
+    "find / -type d -empty"
+  ],
+  "15": [
+    "find . -mtime -7",
+    "find . -type f -mtime -7"
+  ],
+  "16": [
+    "find . -mtime -1",
+    "find . -daystart -mtime -1",
+    "find . -type f -mtime -1",
+    "find . -daystart -mtime 0"
+  ],
+  "17": [
+    "find . -name '.DS_Store' -delete",
+    "find . -name .DS_Store -delete",
+    "find . -name '.DS_Store' -exec rm {} +",
+    "find . -name '.DS_Store' -exec rm {} \\;",
+    "find . -name \".DS_Store\" -delete",
+    "find . -name \".DS_Store\" -exec rm {} \\;"
+  ],
+  "18": [
+    "find . -type l"
+  ],
+  "19": [
+    "find / -user root",
+    "find . -user root"
+  ],
+  "20": [
+    "find . -type d -name node_modules",
+    "find . -type d -name 'node_modules'",
+    "find -name 'node_modules'",
+    "find . -name 'node_modules'",
+    "find . -name \"node_modules\"",
+    "find . -name node_modules"
+  ],
+  "21": [
+    "find . -name '*.py' -exec wc -l {} +",
+    "find . -name '*.py' | xargs wc -l",
+    "wc -l **/*.py",
+    "find . -name '*.py' -exec wc -l {} \\;",
+    "find . -name \"*.py\" -exec wc -l {} +",
+    "find . -name \"*.py\" | xargs wc -l",
+    "wc -l *.py"
+  ],
+  "22": [
+    "du -sh * | sort -hr",
+    "du -sh * | sort -rh",
+    "du -s * | sort -rn"
+  ],
+  "23": [
+    "kill $(lsof -t -i :3000)",
+    "lsof -t -i :3000 | xargs kill",
+    "fuser -k 3000/tcp",
+    "kill $(lsof -t -i :3000 )"
+  ],
+  "24": [
+    "find . -size +1G",
+    "find . -type f -size +1G",
+    "find . -size +1024M",
+    "find . -type f -size +1073741824"
+  ],
+  "25": [
+    "grep -rn 'TODO' --include='*.js'",
+    "grep -rn TODO --include='*.js'",
+    "grep -r TODO --include='*.js'",
+    "grep -rn 'TODO' *.js"
+  ],
+  "26": [
+    "du -ah . | sort -rh | head -10",
+    "du -ah | sort -rh | head -10",
+    "du -a . | sort -rn | head -10"
+  ],
+  "27": [
+    "tar czf archive.tar.gz .",
+    "tar -czf archive.tar.gz .",
+    "tar czvf archive.tar.gz folder/",
+    "tar -czf compressed_folder.tar.gz ./",
+    "tar -czf folder.tar.gz /path/to/folder",
+    "tar czf archive.tar.gz /path/to/folder",
+    "tar czf folder.tar.gz folder",
+    "tar -czf file.tar.gz folder",
+    "tar -czf folder.tar.gz .",
+    "tar -czf folder.tar.gz folder",
+    "tar -czvf folder.tar.gz folder",
+    "tar -czf path/to/compressed.tar.gz path/to/folder",
+    "tar -czvf /path/to/output.tar.gz /path/to/folder",
+    "tar -czf file.tar.gz .",
+    "tar -czf archive.tar.gz folder"
+  ],
+  "28": [
+    "tar xzf file.tar.gz",
+    "tar -xzf file.tar.gz",
+    "tar xvf archive.tar.gz",
+    "tar -xf archive.tar.gz",
+    "tar xzvf archive.tar.gz",
+    "tar -xvzf file.tar.gz",
+    "tar xvf file.tar.gz",
+    "tar -xvf archive.tar.gz",
+    "tar -xvzf archive.tar.gz",
+    "tar -xvzf filename.tar.gz",
+    "tar -xzvf file.tar.gz",
+    "tar -zxvf archive.tar.gz",
+    "tar -zxvf file.tar.gz",
+    "tar -xvf file.tar.gz"
+  ],
+  "29": [
+    "git branch --sort=-committerdate",
+    "git branch -a --sort=-committerdate"
+  ],
+  "30": [
+    "git log --oneline",
+    "git log --pretty=oneline"
+  ],
+  "31": [
+    "git diff --staged",
+    "git diff --cached"
+  ],
+  "32": [
+    "git reset --soft HEAD~1",
+    "git reset --soft HEAD^",
+    "git reset --soft HEAD~"
+  ],
+  "33": [
+    "git log origin/main..HEAD",
+    "git log origin/master..HEAD",
+    "git log --oneline origin/main..HEAD",
+    "git log origin/main..HEAD --oneline"
+  ],
+  "34": [
+    "git branch -m old new",
+    "git branch -m oldname newname",
+    "git branch -m <branch_name> <new_branch_name>",
+    "git branch -m old_branch_name new_branch_name",
+    "git branch -m new_branch_name",
+    "git branch -m branch_name1 branch_name2"
+  ],
+  "35": [
+    "git branch --merged | grep -v main | xargs git branch -d",
+    "git branch --merged | grep -v master | xargs git branch -d"
+  ],
+  "36": [
+    "netstat -an",
+    "netstat",
+    "lsof -i",
+    "netstat -ln"
+  ],
+  "37": [
+    "lsof -i :8080",
+    "lsof -i tcp:8080",
+    "lsof -nP -i :8080"
+  ],
+  "38": [
+    "curl -O https://example.com/file",
+    "curl -o file https://example.com/file",
+    "wget https://example.com/file",
+    "curl -O url",
+    "curl -o filename url",
+    "curl -O https://example.com/file.txt",
+    "curl -O https://example.com/file.zip",
+    "curl -o file.zip https://example.com/file.zip",
+    "wget https://example.com/file.pdf",
+    "wget https://example.com/file.zip -O file.zip"
+  ],
+  "39": [
+    "curl -I https://example.com",
+    "curl -i https://example.com",
+    "curl --head https://example.com"
+  ],
+  "40": [
+    "curl -X POST -H 'Content-Type: application/json' -d '{}'",
+    "curl -X POST -H 'Content-Type: application/json' -d '{}' https://example.com",
+    "curl -X POST https://example.com/api/endpoint -H 'Content-Type: application/json' -d '{\"key\": \"value\"}'",
+    "curl -X POST -H 'Content-Type: application/json' -d '{\"key\": \"value\"}' https://example.com",
+    "curl -X POST https://example.com -H 'Content-Type: application/json' -d '{\"key1\": \"value1\", \"key2\": \"value2\"}'",
+    "curl -X POST -H 'Content-Type: application/json' -d '{\"name\": \"john\", \"age\": 25}' https://example.com",
+    "curl -X POST -H \"Content-Type: application/json\" -d '{\"key\": \"value\"}' https://example.com",
+    "curl -X POST http://localhost:8000/api/endpoint -H \"Content-Type: application/json\" -d '{\"key\": \"value\"}'",
+    "curl -X POST http://localhost:8000/api/post -H \"Content-Type: application/json\" -d '{\"key\":\"value\"}'",
+    "curl -X POST https://api.example.com/endpoint -H \"Content-Type: application/json\" -d '{\"key1\": \"value1\", \"key2\": \"value2\"}'"
+  ],
+  "41": [
+    "tail -f logfile",
+    "tail -f log",
+    "tail -F logfile",
+    "tail -f log_file",
+    "tail -f logfile.txt",
+    "tail -f logfile.log",
+    "tail -f /path/to/logfile",
+    "tail -f /path/to/log_file"
+  ],
+  "42": [
+    "tail -n 50 file",
+    "tail -50 file",
+    "tail -50 filename",
+    "tail -n 50 filename"
+  ],
+  "43": [
+    "ls | wc -l",
+    "ls -1 | wc -l",
+    "find . -maxdepth 1 | wc -l"
+  ],
+  "44": [
+    "sed -i '' 's/\\t/    /g' file",
+    "sed -i '' 's/\t/    /g' file",
+    "expand file"
+  ],
+  "45": [
+    "sort file | uniq",
+    "sort -u file"
+  ],
+  "46": [
+    "diff file1 file2",
+    "diff -u file1 file2"
+  ],
+  "47": [
+    "cp -r src dst",
+    "cp -R src dst",
+    "cp -a src dst",
+    "cp -r source_directory destination_directory",
+    "cp -r path/to/source_directory path/to/target_directory",
+    "cp -R source_directory destination_directory",
+    "cp -r src/ dst/",
+    "cp -r src/ dest/"
+  ],
+  "48": [
+    "mkdir -p path/to/dir",
+    "mkdir -p /path/to/create/directory",
+    "mkdir -p \"path/to/directory\"",
+    "mkdir -p parent_directory_path",
+    "mkdir -p /path/to/directory",
+    "mkdir -p path/to/directory",
+    "mkdir -p directory",
+    "mkdir -p directory_name"
+  ],
+  "49": [
+    "chmod +x file",
+    "chmod 755 file",
+    "chmod +x executable",
+    "chmod +x filename"
+  ],
+  "50": [
+    "stat -f '%A' file",
+    "stat -f '%Lp' file"
+  ],
+  "51": [
+    "find . -type f -exec md5 {} + | sort | uniq -d",
+    "find . -type f -exec md5 {} + | sort | uniq -d | sort"
+  ],
+  "52": [
+    "top",
+    "htop",
+    "activity monitor"
+  ],
+  "53": [
+    "vm_stat",
+    "top -l 1 | head -10",
+    "memory_pressure"
+  ],
+  "54": [
+    "ps aux",
+    "ps -ef",
+    "ps -A"
+  ],
+  "55": [
+    "pkill processname",
+    "killall processname",
+    "pkill process-name",
+    "pkill myprocess",
+    "pkill bash",
+    "pkill shell_name"
+  ],
+  "56": [
+    "dig example.com",
+    "nslookup example.com",
+    "host example.com",
+    "dig domain.com"
+  ],
+  "57": [
+    "nc -zv host 80",
+    "nc -z host 80",
+    "nmap -p 80 host",
+    "nc -zv hostname port",
+    "nc -zv hostname 80"
+  ],
+  "58": [
+    "openssl rand -base64 32",
+    "openssl rand -hex 32",
+    "head -c 32 /dev/urandom | base64"
+  ],
+  "59": [
+    "md5 file",
+    "md5sum file",
+    "md5 file.txt"
+  ],
+  "60": [
+    "shasum -a 256 file",
+    "sha256sum file",
+    "shasum -a 256 <path-to-file>"
+  ],
+  "61": [
+    "open ."
+  ],
+  "62": [
+    "pbcopy",
+    "echo 'text' | pbcopy",
+    "echo <output> | pbcopy",
+    "echo 'output' | pbcopy",
+    "echo \"text\" | pbcopy",
+    "echo \"output\" | pbcopy"
+  ],
+  "63": [
+    "pbpaste"
+  ],
+  "64": [
+    "mdfind content",
+    "mdfind 'content'",
+    "mdfind -name 'query'",
+    "mdfind 'query'"
+  ],
+  "65": [
+    "caffeinate",
+    "caffeinate -d",
+    "caffeinate -t 3600",
+    "caffeinate -t 86400"
+  ],
+  "66": [
+    "say hello",
+    "say 'hello'",
+    "say \"hello\"",
+    "say 'Hello, world!'",
+    "say 'hello world'",
+    "say \"Hello, world!\"",
+    "say \"hello world\""
+  ],
+  "67": [
+    "pmset -g batt",
+    "pmset -g"
+  ],
+  "68": [
+    "sudo dscacheutil -flushcache",
+    "sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder"
+  ],
+  "69": [
+    "brew list",
+    "brew ls"
+  ],
+  "70": [
+    "networksetup -getairportnetwork en0",
+    "ipconfig getpacket en0"
+  ],
+  "71": [
+    "awk -F, '{print $1}' file.csv",
+    "cut -d, -f1 file.csv"
+  ],
+  "72": [
+    "awk '{s+=$1} END {print s}' file",
+    "paste -sd+ file | bc",
+    "cat path/to/file | awk '{s+=$1} END {print s}'"
+  ],
+  "73": [
+    "find . -type f -exec sed -i '' 's/old/new/g' {} +",
+    "grep -rl old . | xargs sed -i '' 's/old/new/g'"
+  ],
+  "74": [
+    "comm -12 <(sort file1) <(sort file2)",
+    "grep -Fxf file1 file2"
+  ],
+  "75": [
+    "sips -s format png input.jpg --out output.png",
+    "convert input.jpg output.png",
+    "convert path/to/input_image.jpg path/to/output_image.png",
+    "sips -s format jpeg input.png --out output.jpeg",
+    "sips -s format png input.jpg",
+    "sips -s format webp input.jpg --out output.webp"
+  ],
+  "76": [
+    "sips --resampleWidth 800 image.jpg",
+    "convert image.jpg -resize 800 image.jpg",
+    "convert image.jpg -resize 800px"
+  ],
+  "77": [
+    "script session.log",
+    "script"
+  ],
+  "78": [
+    "while true; do command; sleep 5; done",
+    "watch -n 5 command"
+  ],
+  "79": [
+    "echo $SHELL",
+    "echo $0"
+  ],
+  "80": [
+    "ln -s target link",
+    "ln -s /path/to/source_file /path/to/target_file",
+    "ln -s source_path target_path",
+    "ln -s source destination",
+    "ln -s /path/to/file /path/to/symlink",
+    "ln -s path/to/file_or_directory path/to/symlink",
+    "ln -s source_path destination_path",
+    "ln -s src dest",
+    "ln -s src dst"
+  ],
+  "81": [
+    "lsof -i -P -n | grep LISTEN",
+    "lsof -iTCP -sTCP:LISTEN",
+    "netstat -an | grep LISTEN",
+    "lsof -iTCP -sTCP:LISTEN -nP"
+  ],
+  "82": [
+    "ps aux | awk '$3 > 50'"
+  ],
+  "83": [
+    "git stash list"
+  ],
+  "84": [
+    "git cherry-pick HASH",
+    "git cherry-pick <hash>",
+    "git cherry-pick <commit>",
+    "git cherry-pick commit",
+    "git cherry-pick <commit-hash>",
+    "git cherry-pick HEAD~1",
+    "git cherry-pick HEAD^",
+    "git cherry-pick commit-hash"
+  ],
+  "85": [
+    "ls -lh file",
+    "ls -lh",
+    "du -sh file",
+    "du -h file",
+    "du -hs filename"
+  ],
+  "86": [
+    "find . -perm 777",
+    "find . -perm -777",
+    "find . -type f -perm 777",
+    "find / -perm 777"
+  ],
+  "87": [
+    "head -n 20 file",
+    "head -20 file",
+    "head -n 20 < filename",
+    "head -20 filename",
+    "cat file | head -20"
+  ],
+  "88": [
+    "ssh -i key.pem user@host",
+    "ssh -i path/to/key_file username@remote_host",
+    "ssh -i /path/to/key username@host",
+    "ssh username@host -i path/to/key",
+    "ssh username@remote_host -i path/to/key_file",
+    "ssh user@hostname -i path/to/key_file.pem",
+    "ssh user@server -i path/to/key.pem",
+    "ssh user@server -i path/to/key_file.pem",
+    "ssh user@server.example.com -i ~/.ssh/id_rsa",
+    "ssh user@host -i path/to/key",
+    "ssh user@host -i path/to/key_file.pem"
+  ],
+  "89": [
+    "rsync -avz src/ user@host:dst/",
+    "rsync -avz src/ user@host:dst",
+    "rsync -avz /path/to/source /path/to/destination",
+    "rsync -avz source_path destination_path",
+    "rsync -avz source_directory remote_server",
+    "rsync -avz . remote_server:destination_directory",
+    "rsync -avz --progress source_directory remote_server",
+    "rsync -avz --progress src_dir remote_server",
+    "rsync -avz /path/to/local/directory remote_server:destination_directory",
+    "rsync -avz /path/to/local/directory remote_server:path/to/remote/directory"
+  ],
+  "90": [
+    "crontab -l"
+  ],
+  "91": [
+    "grep -ri pattern .",
+    "grep -ri 'pattern' .",
+    "grep -rni pattern .",
+    "find . -type f -exec grep -ri 'pattern' {} +",
+    "find . -type f -exec grep -ri 'pattern' +"
+  ],
+  "92": [
+    "wc file",
+    "wc -lwc file",
+    "wc -l -w -c file"
+  ],
+  "93": [
+    "zip -r archive.zip directory",
+    "zip -r archive.zip dir",
+    "zip -r archive.zip directory/",
+    "zip -r /path/to/directory.zip /path/to/directory",
+    "zip -r archive.zip .",
+    "zip -r archive.zip ./",
+    "zip -r directory_name.zip directory",
+    "zip -r file.zip .",
+    "zip -r file.zip ./",
+    "zip -r mydir.zip ./mydir",
+    "zip -r myfile.zip mydir",
+    "zip -r archive.zip directory_to_zip",
+    "zip -r file.zip directory"
+  ],
+  "94": [
+    "unzip file.zip -d directory",
+    "unzip file.zip -d dir",
+    "unzip file.zip -d /path/to/destination",
+    "unzip -d destination_directory file_name.zip",
+    "unzip -d /path/to/output file.zip",
+    "unzip -d destination file.zip",
+    "unzip filename -d destination_directory",
+    "unzip filename -d destination",
+    "unzip -d target_dir filename",
+    "unzip file.zip -d /path/to/directory",
+    "unzip file.zip -d /path/to/unzip",
+    "unzip file.zip -d destination",
+    "unzip file.zip -d destination_directory",
+    "unzip file.zip -d /path/to/unzipped",
+    "unzip file.zip -d destination/"
+  ],
+  "95": [
+    "system_profiler SPHardwareDataType"
+  ],
+  "96": [
+    "system_profiler SPUSBDataType"
+  ],
+  "97": [
+    "date -r 1700000000",
+    "date -r $TIMESTAMP",
+    "date -r $UNIX_TIMESTAMP"
+  ],
+  "98": [
+    "stat -f '%B' file | xargs date -r",
+    "GetFileInfo -d file",
+    "stat -f '%SB' -t '%Y-%m-%d' file"
+  ],
+  "99": [
+    "echo -n 'string' | base64",
+    "printf 'string' | base64",
+    "echo 'string' | base64",
+    "echo -n 'text' | base64",
+    "echo 'input string' | base64",
+    "echo 'your string' | base64",
+    "echo 'your_string' | base64"
+  ],
+  "100": [
+    "env | grep PATH",
+    "printenv | grep PATH",
+    "echo $PATH",
+    "export PATH"
+  ]
+}
