@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 # test-api.sh - Validate API responses for format compliance
-# Usage: ./test-api.sh [--provider anthropic|openai|ollama|deepseek|gemini|copilot|claude-code]
+# Usage: ./test-api.sh [--provider anthropic|openai|ollama|lmstudio|deepseek|gemini|copilot|claude-code]
 
 set -uo pipefail
 
@@ -11,7 +11,7 @@ typeset -g ZSH_AI_CMD_PROVIDER=${ZSH_AI_CMD_PROVIDER:-'anthropic'}
 while [[ $# -gt 0 ]]; do
   case $1 in
     --provider|-p) ZSH_AI_CMD_PROVIDER=$2; shift 2 ;;
-    --help|-h) print "Usage: $0 [--provider anthropic|openai|ollama|deepseek|gemini|copilot|claude-code]"; exit 0 ;;
+    --help|-h) print "Usage: $0 [--provider anthropic|openai|ollama|lmstudio|deepseek|gemini|copilot|claude-code]"; exit 0 ;;
     *) print -u2 "Unknown option: $1"; exit 1 ;;
   esac
 done
@@ -33,6 +33,7 @@ source "${SCRIPT_DIR}/prompt.zsh"
 source "${SCRIPT_DIR}/providers/anthropic.zsh"
 source "${SCRIPT_DIR}/providers/openai.zsh"
 source "${SCRIPT_DIR}/providers/ollama.zsh"
+source "${SCRIPT_DIR}/providers/lmstudio.zsh"
 source "${SCRIPT_DIR}/providers/deepseek.zsh"
 source "${SCRIPT_DIR}/providers/gemini.zsh"
 source "${SCRIPT_DIR}/providers/copilot.zsh"
@@ -42,8 +43,8 @@ source "${SCRIPT_DIR}/providers/claude-code.zsh"
 get_api_key() {
   local provider=$ZSH_AI_CMD_PROVIDER
 
-  # Ollama, Copilot, and Claude Code don't need a key
-  [[ $provider == ollama || $provider == copilot || $provider == claude-code ]] && return 0
+  # LMStudio, Ollama, Copilot, and Claude Code don't need a key
+  [[ $provider == lmstudio || $provider == ollama || $provider == copilot || $provider == claude-code ]] && return 0
 
   local key_var="${(U)provider}_API_KEY"
   local keychain_name="${(e)ZSH_AI_CMD_KEYCHAIN_NAME:-${provider}-api-key}"
@@ -126,6 +127,7 @@ PWD: /tmp/test
     anthropic) _zsh_ai_cmd_anthropic_call "$input" "$prompt" ;;
     openai)    _zsh_ai_cmd_openai_call "$input" "$prompt" ;;
     ollama)    _zsh_ai_cmd_ollama_call "$input" "$prompt" ;;
+    lmstudio)  _zsh_ai_cmd_lmstudio_call "$input" "$prompt" ;;
     deepseek)  _zsh_ai_cmd_deepseek_call "$input" "$prompt" ;;
     gemini)    _zsh_ai_cmd_gemini_call "$input" "$prompt" ;;
     copilot)     _zsh_ai_cmd_copilot_call "$input" "$prompt" ;;
@@ -169,6 +171,7 @@ get_model_name() {
     anthropic) print "$ZSH_AI_CMD_ANTHROPIC_MODEL" ;;
     openai)    print "$ZSH_AI_CMD_OPENAI_MODEL" ;;
     ollama)    print "$ZSH_AI_CMD_OLLAMA_MODEL" ;;
+    lmstudio)  print "$ZSH_AI_CMD_LMSTUDIO_MODEL" ;;
     deepseek)  print "$ZSH_AI_CMD_DEEPSEEK_MODEL" ;;
     gemini)    print "$ZSH_AI_CMD_GEMINI_MODEL" ;;
     copilot)     print "$ZSH_AI_CMD_COPILOT_MODEL" ;;
