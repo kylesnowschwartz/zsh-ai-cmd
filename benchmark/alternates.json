@@ -12,7 +12,13 @@
     "ls -a",
     "ls -l",
     "ls -1",
-    "ls ."
+    "ls .",
+    "eza",
+    "eza -a",
+    "eza -l",
+    "eza -la",
+    "eza -1",
+    "eza --all"
   ],
   "3": [
     "df -h",
@@ -52,35 +58,59 @@
   "11": [
     "find . -mmin -60",
     "find . -type f -mmin -60",
-    "find -mmin -60"
+    "find -mmin -60",
+    "fd --changed-within 1h",
+    "fd --changed-within 1h --type f",
+    "fd --type f --changed-within 1h",
+    "fd -t f --changed-within 1h"
   ],
   "12": [
     "find . -size +100M",
     "find . -type f -size +100M",
     "find -size +100M",
-    "find . -maxdepth 1 -size +100M"
+    "find . -maxdepth 1 -size +100M",
+    "fd --size +100m",
+    "fd --size +100mi",
+    "fd --type f --size +100m",
+    "fd --type f --size +100mi",
+    "fd -t f -S +100m"
   ],
   "13": [
     "find . -name '*.png'",
     "find . -name \"*.png\"",
     "find . -iname '*.png'",
     "find . -type f -name '*.png'",
-    "find . -type f -name \"*.png\""
+    "find . -type f -name \"*.png\"",
+    "fd -e png",
+    "fd --extension png",
+    "fd -e png --type f",
+    "fd -e png -t f"
   ],
   "14": [
     "find . -type d -empty",
     "find -type d -empty",
-    "find / -type d -empty"
+    "find / -type d -empty",
+    "fd --type d --type empty",
+    "fd -t d -t empty",
+    "fd --type empty --type d"
   ],
   "15": [
     "find . -mtime -7",
-    "find . -type f -mtime -7"
+    "find . -type f -mtime -7",
+    "fd --changed-within 7d",
+    "fd --changed-within 7d --type f",
+    "fd --type f --changed-within 7d",
+    "fd -t f --changed-within 7d"
   ],
   "16": [
     "find . -mtime -1",
     "find . -daystart -mtime -1",
     "find . -type f -mtime -1",
-    "find . -daystart -mtime 0"
+    "find . -daystart -mtime 0",
+    "fd --changed-within 1d",
+    "fd --changed-within 1d --type f",
+    "fd --type f --changed-within 1d",
+    "fd --changed-within 24h"
   ],
   "17": [
     "find . -name '.DS_Store' -delete",
@@ -88,14 +118,24 @@
     "find . -name '.DS_Store' -exec rm {} +",
     "find . -name '.DS_Store' -exec rm {} \\;",
     "find . -name \".DS_Store\" -delete",
-    "find . -name \".DS_Store\" -exec rm {} \\;"
+    "find . -name \".DS_Store\" -exec rm {} \\;",
+    "fd -H .DS_Store -x rm",
+    "fd -H '\\.DS_Store$' -x rm",
+    "fd -H -t f .DS_Store -x rm",
+    "fd -HI .DS_Store -x rm"
   ],
   "18": [
-    "find . -type l"
+    "find . -type l",
+    "fd --type symlink",
+    "fd -t l",
+    "fd --type l"
   ],
   "19": [
     "find / -user root",
-    "find . -user root"
+    "find . -user root",
+    "fd --owner root",
+    "fd --owner root /",
+    "fd . / --owner root"
   ],
   "20": [
     "find . -type d -name node_modules",
@@ -103,7 +143,10 @@
     "find -name 'node_modules'",
     "find . -name 'node_modules'",
     "find . -name \"node_modules\"",
-    "find . -name node_modules"
+    "find . -name node_modules",
+    "fd --type d node_modules",
+    "fd -t d node_modules",
+    "fd --type d '^node_modules$'"
   ],
   "21": [
     "find . -name '*.py' -exec wc -l {} +",
@@ -112,7 +155,10 @@
     "find . -name '*.py' -exec wc -l {} \\;",
     "find . -name \"*.py\" -exec wc -l {} +",
     "find . -name \"*.py\" | xargs wc -l",
-    "wc -l *.py"
+    "wc -l *.py",
+    "fd -e py -X wc -l",
+    "fd -e py --exec-batch wc -l",
+    "fd --extension py -X wc -l"
   ],
   "22": [
     "du -sh * | sort -hr",
@@ -129,18 +175,29 @@
     "find . -size +1G",
     "find . -type f -size +1G",
     "find . -size +1024M",
-    "find . -type f -size +1073741824"
+    "find . -type f -size +1073741824",
+    "fd --size +1g",
+    "fd --size +1gi",
+    "fd --type f --size +1g",
+    "fd -t f -S +1g"
   ],
   "25": [
     "grep -rn 'TODO' --include='*.js'",
     "grep -rn TODO --include='*.js'",
     "grep -r TODO --include='*.js'",
-    "grep -rn 'TODO' *.js"
+    "grep -rn 'TODO' *.js",
+    "rg TODO -g '*.js'",
+    "rg -n TODO -g '*.js'",
+    "rg TODO -t js",
+    "rg -n TODO -t js",
+    "rg TODO --glob '*.js'"
   ],
   "26": [
     "du -ah . | sort -rh | head -10",
     "du -ah | sort -rh | head -10",
-    "du -a . | sort -rn | head -10"
+    "du -a . | sort -rn | head -10",
+    "fd . -t f -d 1 | xargs stat -f '%z %N' | sort -rn | head -10",
+    "fd -t f -d 1 -X stat -f '%z %N' | sort -rn | head -10"
   ],
   "27": [
     "tar czf archive.tar.gz .",
@@ -269,7 +326,9 @@
   "43": [
     "ls | wc -l",
     "ls -1 | wc -l",
-    "find . -maxdepth 1 | wc -l"
+    "find . -maxdepth 1 | wc -l",
+    "eza | wc -l",
+    "eza -1 | wc -l"
   ],
   "44": [
     "sed -i '' 's/\\t/    /g' file",
@@ -431,7 +490,10 @@
   ],
   "73": [
     "find . -type f -exec sed -i '' 's/old/new/g' {} +",
-    "grep -rl old . | xargs sed -i '' 's/old/new/g'"
+    "grep -rl old . | xargs sed -i '' 's/old/new/g'",
+    "fd -t f -X sed -i '' 's/old/new/g'",
+    "fd --type f -X sed -i '' 's/old/new/g'",
+    "fd -t f -X sd old new"
   ],
   "74": [
     "comm -12 <(sort file1) <(sort file2)",
@@ -500,13 +562,19 @@
     "ls -lh",
     "du -sh file",
     "du -h file",
-    "du -hs filename"
+    "du -hs filename",
+    "eza -lh",
+    "eza -lh file",
+    "eza -l file",
+    "eza --long --header file"
   ],
   "86": [
     "find . -perm 777",
     "find . -perm -777",
     "find . -type f -perm 777",
-    "find / -perm 777"
+    "find / -perm 777",
+    "fd -t f -X ls -l | rg '^-rwxrwxrwx'",
+    "fd --type f -X ls -l | rg '^-rwxrwxrwx'"
   ],
   "87": [
     "head -n 20 file",
@@ -548,7 +616,11 @@
     "grep -ri 'pattern' .",
     "grep -rni pattern .",
     "find . -type f -exec grep -ri 'pattern' {} +",
-    "find . -type f -exec grep -ri 'pattern' +"
+    "find . -type f -exec grep -ri 'pattern' +",
+    "rg -i pattern",
+    "rg -i pattern .",
+    "rg -i 'pattern'",
+    "rg -i 'pattern' ."
   ],
   "92": [
     "wc file",
