@@ -2,6 +2,20 @@
 
 All notable changes to zsh-ai-cmd are documented in this file.
 
+## [Unreleased]
+
+### Added
+- **Capability grounding** — suggestions are now grounded in the tools actually
+  installed on your machine, not the model's training priors
+  - Probes a curated set of modern alternatives, GNU coreutils, and dev/cloud
+    tools once per shell session (pure-zsh `$commands` lookup, no subprocesses)
+  - Detected tools are passed to the model via the `<context>` block; the prompt
+    now prefers modern alternatives when available (`rg` over `grep`, `fd` over
+    `find`) and never suggests a tool that is neither standard nor installed
+  - Probe list is configurable via `ZSH_AI_CMD_PROBE_TOOLS`
+  - The benchmark harness pins a fixed synthetic capability set for
+    cross-machine reproducibility
+
 ## [v0.2.0] - 2026-04-08
 
 ### Added

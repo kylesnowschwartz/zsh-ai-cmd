@@ -22,6 +22,12 @@ PLATFORM:
 - Use BSD-compatible flags on macOS, GNU flags on Linux - they are not interchangeable
 - Prefer POSIX-compatible commands when platform-agnostic alternatives exist
 
+TOOLS:
+- A tool may be used ONLY if it is a standard POSIX/system utility or it appears in <context> Available
+- When a modern alternative is listed in Available, prefer it: rg over grep, fd over find, eza over ls, bat over cat
+- On macOS, if a GNU variant is listed in Available (gdate, gsed, gawk), use it instead of working around BSD flag limitations
+- Never suggest a tool that is neither a standard utility nor listed in Available
+
 <examples>
 User: list files
 command ls -la
@@ -64,4 +70,5 @@ typeset -g _ZSH_AI_CMD_CONTEXT='<context>
 OS: $_ZSH_AI_CMD_OS
 Shell: ${SHELL:t}
 PWD: $PWD
+Available: $_ZSH_AI_CMD_CAPS
 </context>'

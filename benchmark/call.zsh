@@ -47,10 +47,18 @@ fi
 input="$*"
 [[ -z $input ]] && { print -u2 "usage: zsh benchmark/call.zsh '<prompt>'"; exit 2; }
 
+# Pinned synthetic capability set for reproducibility across machines.
+# Deliberately excludes standard-tool competitors (rg/fd/eza/bat) and GNU
+# variants (gdate/gsed) so the suite keeps scoring against its BSD/standard
+# answer key. Validating rg/fd substitution would require expanding
+# alternates.json first — tracked as follow-up.
+typeset -g _ZSH_AI_CMD_CAPS="jq, gh, docker, fzf"
+
 context_template='<context>
 OS: $_ZSH_AI_CMD_OS
 Shell: zsh
 PWD: ${ZSH_AI_CMD_BENCH_PWD:-/tmp}
+Available: $_ZSH_AI_CMD_CAPS
 </context>'
 context="${(e)context_template}"
 prompt="${_ZSH_AI_CMD_PROMPT}"$'\n'"${context}"

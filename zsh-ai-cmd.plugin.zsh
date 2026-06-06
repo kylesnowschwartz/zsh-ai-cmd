@@ -38,6 +38,18 @@ typeset -g _ZSH_AI_CMD_SUGGESTION=""
 # OS detection (lazy-loaded on first API call)
 typeset -g _ZSH_AI_CMD_OS=""
 
+# Detected tool capabilities (lazy-loaded on first API call)
+typeset -g _ZSH_AI_CMD_CAPS=""
+
+# Tools probed for capability grounding. Standard POSIX utilities are assumed
+# present and omitted; this list is modern alternatives, GNU coreutils on macOS,
+# and common dev/cloud tools the model should only suggest when actually installed.
+typeset -ga ZSH_AI_CMD_PROBE_TOOLS=(
+  rg fd eza bat fzf delta zoxide sd jq yq
+  gdate gsed gawk gtimeout
+  gh docker kubectl terraform podman
+)
+
 # Dormant/Active state machine
 typeset -g _ZSH_AI_CMD_ACTIVE=0
 typeset -g _ZSH_AI_CMD_ORIG_TAB=""
@@ -199,6 +211,17 @@ _zsh_ai_cmd_call_api() {
     else
       _ZSH_AI_CMD_OS="Linux"
     fi
+  fi
+
+  # Lazy capability detection (pure zsh: $commands hash lookup, no subprocesses)
+  if [[ -z $_ZSH_AI_CMD_CAPS ]]; then
+    local _tool _present=()
+    for _tool in $ZSH_AI_CMD_PROBE_TOOLS; do
+      (( $+commands[$_tool] )) && _present+=$_tool
+    done
+    # Sentinel space marks detection as done even when nothing is found,
+    # so we don't re-probe on every call.
+    _ZSH_AI_CMD_CAPS="${(j:, :)_present} "
   fi
 
   local context="${(e)_ZSH_AI_CMD_CONTEXT}"
