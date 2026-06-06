@@ -326,9 +326,7 @@
   "43": [
     "ls | wc -l",
     "ls -1 | wc -l",
-    "find . -maxdepth 1 | wc -l",
-    "eza | wc -l",
-    "eza -1 | wc -l"
+    "find . -maxdepth 1 | wc -l"
   ],
   "44": [
     "sed -i '' 's/\\t/    /g' file",
