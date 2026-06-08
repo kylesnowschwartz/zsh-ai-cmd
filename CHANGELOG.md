@@ -2,6 +2,51 @@
 
 All notable changes to zsh-ai-cmd are documented in this file.
 
+
+## [v0.3.0] - 2026-06-08
+
+### Added
+- **LM Studio Provider** (`ZSH_AI_CMD_PROVIDER='lmstudio'`)
+  - Local inference via LM Studio's OpenAI-compatible API server
+  - No API key required — runs entirely on your machine
+  - Configurable host via `ZSH_AI_CMD_LMSTUDIO_HOST` (default: `localhost:1234`)
+  - Configurable model via `ZSH_AI_CMD_LMSTUDIO_MODEL` (default: `qwen2.5.1-coder-7b-instruct`)
+  - Structured JSON output via `response_format` for reliable command extraction
+  - `--max-time 60` on completion curl to prevent terminal hangs on stalled models
+  - Error handling for API error responses (model not loaded, unsupported format, etc.)
+
+### Configuration
+```sh
+export ZSH_AI_CMD_PROVIDER='lmstudio'
+
+# Optional: change default model
+export ZSH_AI_CMD_LMSTUDIO_MODEL='qwen2.5.1-coder-7b-instruct'
+
+# Optional: custom host/port
+export ZSH_AI_CMD_LMSTUDIO_HOST='localhost:1234'
+```
+
+### How to Test
+1. Install [LM Studio](https://lmstudio.ai/) and download any GGUF model
+2. Start the local server: click **"Start Server"** in the left sidebar (default `localhost:1234`)
+3. In your terminal:
+   ```sh
+   export ZSH_AI_CMD_PROVIDER='lmstudio'
+   source ./zsh-ai-cmd.plugin.zsh
+   # Type natural language, press Ctrl+Z
+   list files modified today<Ctrl+Z>
+   ```
+4. Run automated validation:
+   ```sh
+   ./test-api.sh --provider lmstudio
+   ```
+
+### Testing
+- Added lmstudio to `test-api.sh` provider list and test dispatch
+- Error handling verified: API error responses (e.g., model not loaded) are surfaced to the user with a clear message instead of silently producing empty suggestions
+
+---
+
 ## [v0.2.0] - 2026-04-08
 
 ### Added
