@@ -19,7 +19,7 @@ The main plugin lives in @zsh-ai-cmd.plugin.zsh with provider implementations in
  | Gemini     | `providers/gemini.zsh`    | `gemini-3-flash-preview`       | `GEMINI_API_KEY`    |                               |
  | DeepSeek   | `providers/deepseek.zsh`  | `deepseek-chat`                | `DEEPSEEK_API_KEY`  |                               |
  | Ollama     | `providers/ollama.zsh`    | `mistral-small`                | (none - local)      | `ZSH_AI_CMD_OLLAMA_HOST`      |
- | LMStudio   | `providers/lmstudio.zsh`  | `qwen2.5.1-coder-7b-instruct ` | (none - local)      | `ZSH_AI_CMD_LMSTUDIO_HOST`    |
+ | LMStudio   | `providers/lmstudio.zsh`  | `qwen2.5-coder-7b-instruct`    | (none - local)      | `ZSH_AI_CMD_LMSTUDIO_HOST`    |
  | Copilot    | `providers/copilot.zsh`   | `gpt-4o`                       | (none - local)      | `ZSH_AI_CMD_COPILOT_HOST`     |
  | Claude Code | `providers/claude-code.zsh` | (CLI default)               | (none - subscription) |                             |
 

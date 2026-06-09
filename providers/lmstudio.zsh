@@ -1,12 +1,12 @@
 # providers/lmstudio.zsh - LM Studio local inference provider
-# No API key required, runs locally. 
+# No API key required, runs locally.
 
-typeset -g ZSH_AI_CMD_LMSTUDIO_MODEL=${ZSH_AI_CMD_LMSTUDIO_MODEL:-'qwen2.5.1-coder-7b-instruct'}
+typeset -g ZSH_AI_CMD_LMSTUDIO_MODEL=${ZSH_AI_CMD_LMSTUDIO_MODEL:-'qwen2.5-coder-7b-instruct'}
 typeset -g ZSH_AI_CMD_LMSTUDIO_HOST=${ZSH_AI_CMD_LMSTUDIO_HOST:-'localhost:1234'}
 
 _zsh_ai_cmd_lmstudio_key_error() {
-  print -u2 "Error: LM Studio provider configurations missing." >&2
-  print -u2 "Ensure ZSH_AI_CMD_LMSTUDIO_HOST is correct." >&2
+  print -u2 "Error: LM Studio provider configurations missing."
+  print -u2 "Ensure ZSH_AI_CMD_LMSTUDIO_HOST is correct."
   return 1
 }
 
