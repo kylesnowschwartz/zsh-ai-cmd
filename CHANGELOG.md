@@ -2,7 +2,7 @@
 
 All notable changes to zsh-ai-cmd are documented in this file.
 
-## [Unreleased]
+## [v0.3.0] - 2026-06-09
 
 ### Added
 - **Capability grounding** — suggestions are now grounded in the tools actually
