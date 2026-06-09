@@ -17,6 +17,30 @@ All notable changes to zsh-ai-cmd are documented in this file.
     `rg`/`fd`/`eza`) for cross-machine reproducibility, and `alternates.json`
     carries both standard and modern accepted variants so correct substitutions
     score as exact/review rather than being penalized
+- **LM Studio Provider** (`ZSH_AI_CMD_PROVIDER='lmstudio'`)
+  - Local inference via LM Studio's OpenAI-compatible API server
+  - No API key required — runs entirely on your machine
+  - Configurable host via `ZSH_AI_CMD_LMSTUDIO_HOST` (default: `localhost:1234`)
+  - Configurable model via `ZSH_AI_CMD_LMSTUDIO_MODEL` (default: `qwen2.5-coder-7b-instruct`)
+  - Structured JSON output via `response_format` for reliable command extraction
+  - `--max-time 60` on the completion request to prevent terminal hangs on stalled models
+  - Surfaces API error responses (model not loaded, unsupported format) instead of returning empty suggestions
+
+### Configuration
+```sh
+export ZSH_AI_CMD_PROVIDER='lmstudio'
+
+# Optional: change default model
+export ZSH_AI_CMD_LMSTUDIO_MODEL='qwen2.5-coder-7b-instruct'
+
+# Optional: custom host/port
+export ZSH_AI_CMD_LMSTUDIO_HOST='localhost:1234'
+```
+
+LM Studio must be running with its local server started (default `localhost:1234`).
+
+### Credits
+Thanks to @marshal-81 for the LM Studio provider (#18).
 
 ## [v0.2.0] - 2026-04-08
 
