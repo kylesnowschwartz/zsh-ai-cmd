@@ -101,12 +101,12 @@ if ! command -v python3 &>/dev/null; then
 fi
 
 MOCK_PORT=19876
-MOCK_REQUEST_FILE=$(mktemp)
+MOCK_REQUEST_FILE=$(command mktemp)
 MOCK_SCRIPT=$(mktemp /tmp/mock_server_XXXXXX.py)
 MOCK_PID=""
 
 # Clean up on exit
-trap 'kill $MOCK_PID 2>/dev/null; rm -f "$MOCK_REQUEST_FILE" "$MOCK_SCRIPT"' EXIT INT TERM
+trap 'kill $MOCK_PID 2>/dev/null; command rm -f "$MOCK_REQUEST_FILE" "$MOCK_SCRIPT"' EXIT INT TERM
 
 # Write Python mock server to a temp file (avoids heredoc/shell-expansion conflicts)
 python3 -c "

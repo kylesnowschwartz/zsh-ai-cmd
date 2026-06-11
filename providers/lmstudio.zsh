@@ -65,7 +65,7 @@ _zsh_ai_cmd_lmstudio_call() {
   # Debug log
   if [[ $ZSH_AI_CMD_DEBUG == true ]]; then
     {
-      print -- "=== $(date '+%Y-%m-%d %H:%M:%S') [lmstudio] ==="
+      print -- "=== $(command date '+%Y-%m-%d %H:%M:%S') [lmstudio] ==="
       print -- "--- REQUEST ---"
       command jq . <<< "$payload"
       print -- "--- RESPONSE ---"

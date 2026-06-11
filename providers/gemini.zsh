@@ -40,7 +40,7 @@ _zsh_ai_cmd_gemini_call() {
   # Debug log
   if [[ $ZSH_AI_CMD_DEBUG == true ]]; then
     {
-      print -- "=== $(date '+%Y-%m-%d %H:%M:%S') [gemini] ==="
+      print -- "=== $(command date '+%Y-%m-%d %H:%M:%S') [gemini] ==="
       print -- "--- REQUEST ---"
       command jq . <<< "$payload"
       print -- "--- RESPONSE ---"
