@@ -37,7 +37,7 @@ _zsh_ai_cmd_ollama_call() {
   # Debug log
   if [[ $ZSH_AI_CMD_DEBUG == true ]]; then
     {
-      print -- "=== $(date '+%Y-%m-%d %H:%M:%S') [ollama] ==="
+      print -- "=== $(command date '+%Y-%m-%d %H:%M:%S') [ollama] ==="
       print -- "--- REQUEST ---"
       command jq . <<< "$payload"
       print -- "--- RESPONSE ---"

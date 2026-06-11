@@ -146,9 +146,9 @@ _zsh_ai_cmd_activate() {
   _ZSH_AI_CMD_BUFFER_AT_SUGGESTION="$BUFFER"
 
   # Capture current bindings before overwriting
-  _ZSH_AI_CMD_ORIG_TAB=$(bindkey -M main '^I' 2>/dev/null | awk '{print $2}')
+  _ZSH_AI_CMD_ORIG_TAB=$(bindkey -M main '^I' 2>/dev/null | command awk '{print $2}')
   [[ $_ZSH_AI_CMD_ORIG_TAB == _zsh_ai_cmd_accept ]] && _ZSH_AI_CMD_ORIG_TAB=""
-  _ZSH_AI_CMD_ORIG_RIGHT_ARROW=$(bindkey -M main '^[[C' 2>/dev/null | awk '{print $2}')
+  _ZSH_AI_CMD_ORIG_RIGHT_ARROW=$(bindkey -M main '^[[C' 2>/dev/null | command awk '{print $2}')
   [[ $_ZSH_AI_CMD_ORIG_RIGHT_ARROW == _zsh_ai_cmd_accept_arrow ]] && _ZSH_AI_CMD_ORIG_RIGHT_ARROW=""
 
   # Bind our accept handlers
@@ -208,7 +208,7 @@ _zsh_ai_cmd_call_api() {
   # Lazy OS detection
   if [[ -z $_ZSH_AI_CMD_OS ]]; then
     if [[ $OSTYPE == darwin* ]]; then
-      _ZSH_AI_CMD_OS="macOS $(sw_vers -productVersion 2>/dev/null || print 'unknown')"
+      _ZSH_AI_CMD_OS="macOS $(command sw_vers -productVersion 2>/dev/null || print 'unknown')"
     else
       _ZSH_AI_CMD_OS="Linux"
     fi
@@ -255,7 +255,7 @@ _zsh_ai_cmd_suggest() {
   local i=0
 
   # Start API call in background (suppress job control noise)
-  local tmpfile=$(mktemp)
+  local tmpfile=$(command mktemp)
   setopt local_options no_notify no_monitor clobber
   ( _zsh_ai_cmd_call_api "$BUFFER" > "$tmpfile" ) &!
   local pid=$!
@@ -264,7 +264,7 @@ _zsh_ai_cmd_suggest() {
   while kill -0 $pid 2>/dev/null; do
     POSTDISPLAY=" ${spinner:$((i % 10)):1}"
     zle -R
-    read -t 0.1 -k 1 && { kill $pid 2>/dev/null; POSTDISPLAY=""; rm -f "$tmpfile"; return; }
+    read -t 0.1 -k 1 && { kill $pid 2>/dev/null; POSTDISPLAY=""; command rm -f "$tmpfile"; return; }
     ((i++))
   done
   wait $pid 2>/dev/null
@@ -272,7 +272,7 @@ _zsh_ai_cmd_suggest() {
   # Read and sanitize result (security: strip control chars, newlines, escapes)
   local suggestion
   suggestion=$(_zsh_ai_cmd_sanitize "$(<"$tmpfile")")
-  rm -f "$tmpfile"
+  command rm -f "$tmpfile"
 
   if [[ -n $suggestion ]]; then
     _ZSH_AI_CMD_SUGGESTION=$suggestion
@@ -363,7 +363,7 @@ _zsh_ai_cmd_get_key() {
     local expanded_command="${(e)ZSH_AI_CMD_API_KEY_COMMAND}"
 
     [[ $ZSH_AI_CMD_DEBUG == true ]] && {
-      print -- "=== $(date '+%Y-%m-%d %H:%M:%S') [get_key] ===" >> $ZSH_AI_CMD_LOG
+      print -- "=== $(command date '+%Y-%m-%d %H:%M:%S') [get_key] ===" >> $ZSH_AI_CMD_LOG
       print -- "provider: $provider" >> $ZSH_AI_CMD_LOG
       print -- "command: $expanded_command" >> $ZSH_AI_CMD_LOG
     }
@@ -392,7 +392,7 @@ _zsh_ai_cmd_get_key() {
 
   # Try macOS Keychain
   local key
-  key=$(security find-generic-password -s "$keychain_name" -a "$USER" -w 2>/dev/null)
+  key=$(command security find-generic-password -s "$keychain_name" -a "$USER" -w 2>/dev/null)
   if [[ -n $key ]]; then
     typeset -g "$key_var"="$key"
     return 0

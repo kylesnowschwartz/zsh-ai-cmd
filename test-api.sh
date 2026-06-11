@@ -19,7 +19,7 @@ done
 # OS detection
 typeset -g _ZSH_AI_CMD_OS
 if [[ $OSTYPE == darwin* ]]; then
-  _ZSH_AI_CMD_OS="macOS $(sw_vers -productVersion 2>/dev/null || print 'unknown')"
+  _ZSH_AI_CMD_OS="macOS $(command sw_vers -productVersion 2>/dev/null || print 'unknown')"
 else
   _ZSH_AI_CMD_OS="Linux"
 fi
@@ -54,7 +54,7 @@ get_api_key() {
 
   # Try macOS Keychain
   local key
-  key=$(security find-generic-password -s "$keychain_name" -a "$USER" -w 2>/dev/null)
+  key=$(command security find-generic-password -s "$keychain_name" -a "$USER" -w 2>/dev/null)
   if [[ -n $key ]]; then
     typeset -g "$key_var"="$key"
     return 0

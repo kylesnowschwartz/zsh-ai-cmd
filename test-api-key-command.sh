@@ -14,7 +14,7 @@ FAIL=0
 # ============================================================================
 
 # Clean log before starting
-rm -f /tmp/zsh-ai-cmd.log
+command rm -f /tmp/zsh-ai-cmd.log
 
 # Source the plugin (but not as a widget context, so no ZLE needed)
 source "${SCRIPT_DIR}/zsh-ai-cmd.plugin.zsh" 2>/dev/null
@@ -87,7 +87,7 @@ print ""
 
 # Test 1: Basic custom command sets API key
 reset_env
-rm -f /tmp/zsh-ai-cmd.log
+command rm -f /tmp/zsh-ai-cmd.log
 export ZSH_AI_CMD_DEBUG=true
 export ZSH_AI_CMD_API_KEY_COMMAND="echo test-key-12345"
 export ZSH_AI_CMD_PROVIDER=anthropic

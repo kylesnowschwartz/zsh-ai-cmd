@@ -31,7 +31,7 @@ _zsh_ai_cmd_claude_code_call() {
   # Debug log
   if [[ $ZSH_AI_CMD_DEBUG == true ]]; then
     {
-      print -- "=== $(date '+%Y-%m-%d %H:%M:%S') [claude-code] ==="
+      print -- "=== $(command date '+%Y-%m-%d %H:%M:%S') [claude-code] ==="
       print -- "--- REQUEST ---"
       print -- "Model: ${ZSH_AI_CMD_CLAUDE_CODE_MODEL:-default}"
       print -- "Input: $input"
