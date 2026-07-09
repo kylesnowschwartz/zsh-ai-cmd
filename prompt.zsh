@@ -66,6 +66,58 @@ User: edit crontab with nano
 EDITOR=nano command crontab -e
 </examples>'
 
+# Extra guidance for providers with structured (JSON) output. Text-mode
+# providers (copilot, claude-code) must NOT receive this: they rely on the
+# base prompt's single-command rule.
+typeset -g _ZSH_AI_CMD_PROMPT_STRUCTURED='
+ALTERNATIVES:
+- Fill "alternatives" with up to 2 meaningfully different approaches (a different tool or strategy, not flag variations)
+- When both a standard utility and a modern tool from Available can do the job, the primary uses one and "alternatives" offers the other
+- Order by preference; "command" holds the best option
+- Leave "alternatives" empty only when no genuinely different approach exists
+
+DESTRUCTIVE:
+- Mark "destructive": true for any command that deletes or overwrites data, kills processes, rewrites git history, or is otherwise hard to undo'
+
+# Shared structured-output JSON schema — single source of truth for the five
+# schema-capable providers. Gemini's responseSchema dialect rejects
+# additionalProperties; its provider strips those keys inline (see gemini.zsh).
+typeset -g _ZSH_AI_CMD_SCHEMA='{
+  "type": "object",
+  "properties": {
+    "command": {"type": "string", "description": "The best shell command"},
+    "destructive": {"type": "boolean", "description": "True when the command deletes/overwrites data, kills processes, or is otherwise hard to undo"},
+    "alternatives": {
+      "type": "array",
+      "description": "Up to 2 meaningfully different alternative commands; empty when one approach is clearly best",
+      "items": {
+        "type": "object",
+        "properties": {
+          "command": {"type": "string"},
+          "destructive": {"type": "boolean"}
+        },
+        "required": ["command", "destructive"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["command", "destructive", "alternatives"],
+  "additionalProperties": false
+}'
+
+# Shared jq filter: converts the structured JSON object into the provider wire
+# format consumed by the widget — one suggestion per line, "D<TAB>command" for
+# destructive commands, "S<TAB>command" otherwise. Hardened against shape drift
+# (DeepSeek's json_object mode has no server-side schema): non-array
+# alternatives and non-object elements are ignored rather than aborting the
+# whole stream, non-string commands are skipped, and string booleans count as
+# destructive.
+typeset -g _ZSH_AI_CMD_JQ_EMIT='([{command, destructive}]
+    + ((.alternatives // []) | if type == "array" then map(select(type == "object")) else [] end))
+  | .[]
+  | select((.command | type) == "string" and (.command | length) > 0)
+  | (if .destructive == true or .destructive == "true" then "D" else "S" end) + "\t" + (.command | gsub("\n"; " "))'
+
 typeset -g _ZSH_AI_CMD_CONTEXT='<context>
 OS: $_ZSH_AI_CMD_OS
 Shell: ${SHELL:t}

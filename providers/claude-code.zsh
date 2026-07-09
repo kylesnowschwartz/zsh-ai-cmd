@@ -43,10 +43,11 @@ _zsh_ai_cmd_claude_code_call() {
 
   [[ -z $response ]] && return 1
 
-  # Text mode returns the command directly (no JSON to parse).
-  # Error messages from the CLI are suppressed by 2>/dev/null above;
-  # an empty response is the only failure signal.
-  print -r -- "$response"
+  # Text mode returns the command directly (no JSON to parse), so no
+  # alternatives and no destructive detection. Error messages from the CLI are
+  # suppressed by 2>/dev/null above; an empty response is the only failure
+  # signal. Wire format: S<TAB>command.
+  print -r -- "S"$'\t'"${response//$'\n'/ }"
 }
 
 _zsh_ai_cmd_claude_code_key_error() {

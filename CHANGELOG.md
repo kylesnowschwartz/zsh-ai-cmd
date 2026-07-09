@@ -2,9 +2,40 @@
 
 All notable changes to zsh-ai-cmd are documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- **Alternative suggestions** — structured-output providers now return up to 2
+  meaningfully different approaches alongside the primary command; pressing the
+  trigger key (`Ctrl+Z`) while a suggestion is showing cycles through them,
+  with a `⟲ 1/3` counter in the ghost text
+- **Destructive command tinting** — suggestions that delete/overwrite data,
+  kill processes, or rewrite git history are flagged by the model, tinted with
+  `ZSH_AI_CMD_HIGHLIGHT_DESTRUCTIVE` (default `fg=red`), and marked with `⚠`
+- Provider wire format: providers emit one suggestion per line as
+  `D<TAB>command` / `S<TAB>command`; the widget sanitizes each line
+  individually, dedupes (upgrading to destructive when duplicate flags
+  disagree), caps at 3 suggestions, and drops unflagged lines (fail-closed —
+  stray provider output is never shown as a "safe" suggestion)
+- Text-mode providers (`copilot`, `claude-code`) keep single-suggestion
+  behavior and always emit the safe flag
+- Repeat trigger on a single suggestion re-queries the API (re-roll),
+  preserving the pre-cycling behavior
+- Shared `$_ZSH_AI_CMD_SCHEMA` in `prompt.zsh` — single source of truth for
+  the five schema-capable providers (Gemini strips `additionalProperties`
+  inline for its dialect); the shared jq emit filter is hardened against
+  shape drift from schema-less providers (non-array `alternatives`,
+  string-typed booleans, non-string commands)
+- Raised output-token caps from 256 to 1024 on anthropic/openai/deepseek so
+  three long commands fit without JSON truncation
+- Benchmark harness (`benchmark/call.zsh`) and mock-server test updated for
+  the wire format
+
 ## [v0.3.0] - 2026-06-09
 
 ### Added
+
 - **Capability grounding** — suggestions are now grounded in the tools actually
   installed on your machine, not the model's training priors
   - Probes a curated set of modern alternatives, GNU coreutils, and dev/cloud
@@ -27,6 +58,7 @@ All notable changes to zsh-ai-cmd are documented in this file.
   - Surfaces API error responses (model not loaded, unsupported format) instead of returning empty suggestions
 
 ### Configuration
+
 ```sh
 export ZSH_AI_CMD_PROVIDER='lmstudio'
 
@@ -40,11 +72,13 @@ export ZSH_AI_CMD_LMSTUDIO_HOST='localhost:1234'
 LM Studio must be running with its local server started (default `localhost:1234`).
 
 ### Credits
+
 Thanks to @marshal-81 for the LM Studio provider (#18).
 
 ## [v0.2.0] - 2026-04-08
 
 ### Added
+
 - **Claude Code Provider** (`ZSH_AI_CMD_PROVIDER='claude-code'`)
   - Use your Claude subscription (Max/Pro/Enterprise) instead of an API key
   - Routes through the Claude Code CLI (`claude -p`) in pipe mode
@@ -54,6 +88,7 @@ Thanks to @marshal-81 for the LM Studio provider (#18).
   - Text output mode for faster responses (matches copilot provider approach)
 
 ### Configuration
+
 ```sh
 export ZSH_AI_CMD_PROVIDER='claude-code'
 
@@ -62,16 +97,19 @@ export ZSH_AI_CMD_CLAUDE_CODE_MODEL='haiku'
 ```
 
 ### Performance Notes
+
 Slower than direct API providers (~3-5s vs ~1-3s) due to CLI startup overhead.
 Best suited for users who prefer using their existing Claude subscription over
 separate API billing.
 
 ### Testing
+
 - All 19 API validation tests pass with claude-code provider
 - Added claude-code to test-api.sh test suite
 - Updated README.md and CLAUDE.md with provider documentation
 
 ### Credits
+
 Thanks to @ohare93 for the original implementation in #12 and #17.
 
 ---
@@ -79,6 +117,7 @@ Thanks to @ohare93 for the original implementation in #12 and #17.
 ## [v0.1.0] - 2026-01-26
 
 ### Added
+
 - **Custom API Key Command Support** (`ZSH_AI_CMD_API_KEY_COMMAND`)
   - Retrieve API keys via custom commands (e.g., `secret-tool`, `pass`, 1Password CLI, AWS Secrets Manager)
   - Dynamic `${provider}` expansion in command string
@@ -89,12 +128,15 @@ Thanks to @ohare93 for the original implementation in #12 and #17.
   - Opt-in feature (empty default, no behavior change without config)
 
 ### API Key Retrieval Sequence
+
 Keys are now retrieved in this order:
+
 1. Environment variables (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, etc.)
 2. Custom command (`ZSH_AI_CMD_API_KEY_COMMAND` with `${provider}` expansion) — if configured
 3. macOS Keychain (`ZSH_AI_CMD_KEYCHAIN_NAME`)
 
 ### Examples
+
 ```sh
 # Linux with GNOME Keyring
 export ZSH_AI_CMD_API_KEY_COMMAND='secret-tool lookup service ${provider}'
@@ -110,12 +152,14 @@ export ZSH_AI_CMD_API_KEY_COMMAND='aws secretsmanager get-secret-value --secret-
 ```
 
 ### Testing
+
 - Added 21 comprehensive feature tests in `test-api-key-command.sh`
 - All 19 existing API validation tests pass
 - Full backwards compatibility verified
 - Case normalization tests included
 
 ### Documentation
+
 - Updated README.md with new "Custom API Key Retrieval" section
 - Updated CLAUDE.md with API Key Retrieval details
 - Added this CHANGELOG.md

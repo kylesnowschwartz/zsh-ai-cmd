@@ -5,12 +5,15 @@ typeset -g ZSH_AI_CMD_GEMINI_MODEL=${ZSH_AI_CMD_GEMINI_MODEL:-'gemini-3-flash-pr
 
 _zsh_ai_cmd_gemini_call() {
   local input=$1
-  local prompt=$2
+  local prompt=$2"$_ZSH_AI_CMD_PROMPT_STRUCTURED"
 
+  # Gemini's responseSchema dialect rejects additionalProperties — strip it
+  # from the shared schema inside jq (recursive del, no extra fork)
   local payload
   payload=$(command jq -nc \
     --arg system "$prompt" \
     --arg content "$input" \
+    --argjson schema "$_ZSH_AI_CMD_SCHEMA" \
     '{
       system_instruction: {
         parts: [{text: $system}]
@@ -20,13 +23,7 @@ _zsh_ai_cmd_gemini_call() {
       }],
       generationConfig: {
         responseMimeType: "application/json",
-        responseSchema: {
-          type: "object",
-          properties: {
-            command: {type: "string", description: "The shell command"}
-          },
-          required: ["command"]
-        }
+        responseSchema: ($schema | del(.. | .additionalProperties?))
       }
     }')
 
@@ -57,8 +54,8 @@ _zsh_ai_cmd_gemini_call() {
     return 1
   fi
 
-  # Extract command from response (structured output ensures valid JSON)
-  print -r -- "$response" | command jq -re '.candidates[0].content.parts[0].text | fromjson | .command // empty' 2>/dev/null
+  # Extract suggestions from response (wire format: D/S<TAB>command per line)
+  print -r -- "$response" | command jq -re ".candidates[0].content.parts[0].text | fromjson | $_ZSH_AI_CMD_JQ_EMIT" 2>/dev/null
 }
 
 _zsh_ai_cmd_gemini_key_error() {

@@ -37,12 +37,22 @@ security add-generic-password -s 'anthropic-api-key' -a "$USER" -w 'sk-ant-...'
 3. Ghost text appears showing the command: `find large files → find . -size +100M`
 4. Press `Tab` or `→` to accept, or keep typing to dismiss
 
+When the model sees more than one reasonable approach, the ghost text shows a
+cycle counter (`⟲ 1/3`) — press `Ctrl+Z` again to cycle through the
+alternatives, then `Tab` to accept the one showing.
+
+Destructive suggestions (`rm`, `kill`, `sed -i`, history rewrites, …) are
+tinted red and marked with `⚠` so you notice before accepting. Providers
+without structured output (`copilot`, `claude-code`) return a single
+suggestion and can't flag destructive commands.
+
 ## Configuration
 
 ```sh
 ZSH_AI_CMD_PROVIDER='anthropic'              # Provider: anthropic, openai, gemini, deepseek, ollama, copilot, claude-code
 ZSH_AI_CMD_KEY='^z'                          # Trigger key (default: Ctrl+Z)
 ZSH_AI_CMD_HIGHLIGHT='fg=8'                  # Ghost text style (zsh region_highlight format)
+ZSH_AI_CMD_HIGHLIGHT_DESTRUCTIVE='fg=red'    # Ghost text style for destructive suggestions
 ZSH_AI_CMD_DEBUG=false                       # Enable debug logging
 ZSH_AI_CMD_LOG=/tmp/zsh-ai-cmd.log           # Debug log path
 
@@ -68,6 +78,7 @@ ZSH_AI_CMD_CLAUDE_CODE_MODEL=''             # Requires Claude Code CLI (claude l
 ## Custom API Key Retrieval
 
 By default, zsh-ai-cmd checks:
+
 1. Environment variables (`ANTHROPIC_API_KEY`, etc.)
 2. Custom command (`ZSH_AI_CMD_API_KEY_COMMAND` with `${provider}` expansion)
 3. macOS Keychain
@@ -89,6 +100,7 @@ export ZSH_AI_CMD_API_KEY_COMMAND='aws secretsmanager get-secret-value --secret-
 ```
 
 **Important**:
+
 - Use `${provider}` for dynamic expansion (works for all providers: anthropic, openai, etc.)
 - Command must output the API key to stdout
 - Empty output or command failure falls back to Keychain

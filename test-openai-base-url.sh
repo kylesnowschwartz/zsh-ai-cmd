@@ -97,7 +97,7 @@ if ! command -v python3 &>/dev/null; then
   print ""
   print "================================"
   print "Results: $PASS passed, $FAIL failed (1 skipped)"
-  (( FAIL > 0 )) && exit 1 || exit 0
+  ((FAIL > 0)) && exit 1 || exit 0
 fi
 
 MOCK_PORT=19876
@@ -125,7 +125,7 @@ class MockHandler(BaseHTTPRequestHandler):
         with open(request_file, \"w\") as f:
             f.write(body)
         response = json.dumps({
-            \"choices\": [{\"message\": {\"content\": json.dumps({\"command\": \"ls -la\"})}}]
+            \"choices\": [{\"message\": {\"content\": json.dumps({\"command\": \"ls -la\", \"destructive\": False, \"alternatives\": []})}}]
         }).encode()
         self.send_response(200)
         self.send_header(\"Content-Type\", \"application/json\")
@@ -139,7 +139,7 @@ class MockHandler(BaseHTTPRequestHandler):
 HTTPServer((\"127.0.0.1\", port), MockHandler).serve_forever()
 '''
 print(script)
-" > "$MOCK_SCRIPT"
+" >"$MOCK_SCRIPT"
 
 # Start mock server in background
 python3 "$MOCK_SCRIPT" "$MOCK_PORT" "$MOCK_REQUEST_FILE" &
@@ -167,9 +167,10 @@ else
   # Call the provider directly
   result=$(_zsh_ai_cmd_openai_call "list files" "$_ZSH_AI_CMD_PROMPT" 2>/dev/null)
 
+  # Providers emit the wire format: S<TAB>command for a safe suggestion
   assert_equals \
-    "Provider returns command parsed from mock response" \
-    "ls -la" \
+    "Provider returns wire-format line parsed from mock response" \
+    "S"$'\t'"ls -la" \
     "$result"
 
   # Verify the request actually hit our mock
@@ -193,4 +194,4 @@ print ""
 print "================================"
 print "Results: $PASS passed, $FAIL failed"
 
-(( FAIL > 0 )) && exit 1 || exit 0
+((FAIL > 0)) && exit 1 || exit 0

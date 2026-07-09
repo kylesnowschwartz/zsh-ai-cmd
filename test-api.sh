@@ -90,19 +90,47 @@ typeset -A TESTS=(
   ["extract audio from movie.mkv as mp3"]="ffmpeg"
 )
 
+# Providers emit the wire format "D<TAB>command" / "S<TAB>command", one
+# suggestion per line (primary first, then alternatives).
 validate_output() {
   local output=$1
+  local category=$2
   local errors=()
+  local -a lines flags cmds
 
-  [[ -z $output ]] && errors+=("empty output")
-  [[ $output == *'```'* ]] && errors+=("contains code fence")
-  [[ $output == *'`'* ]] && errors+=("contains backticks")
-  [[ $output == *$'\n'* ]] && errors+=("multi-line output")
-  [[ $output == *"Or "* ]] && errors+=("contains alternatives")
-  [[ $output == *"you can"* ]] && errors+=("contains explanation")
-  [[ $output == *"Note:"* ]] && errors+=("contains note")
-  [[ $output == *"#"* && $output != *"xargs"* ]] && errors+=("contains comment")
-  [[ ! $output =~ ^[a-zA-Z./\(] ]] && errors+=("doesn't start like a command")
+  [[ -z $output ]] && { print -r -- "empty output"; return 1 }
+
+  lines=("${(@f)output}")
+  local line
+  # Quoted expansion: unquoted $lines drops empty elements in zsh, hiding
+  # interior blank lines from the flag check
+  for line in "${lines[@]}"; do
+    if [[ $line != [DS]$'\t'* ]]; then
+      errors+=("line missing D/S flag: ${line[1,40]}")
+      continue
+    fi
+    flags+=("${line[1]}")
+    cmds+=("${line#?$'\t'}")
+  done
+
+  (( ${#cmds[@]} == 0 )) && errors+=("no commands")
+  (( ${#cmds[@]} > 3 )) && errors+=("more than 3 suggestions")
+
+  local cmd
+  for cmd in "${cmds[@]}"; do
+    [[ $cmd == *'```'* ]] && errors+=("contains code fence")
+    [[ $cmd == *'`'* ]] && errors+=("contains backticks")
+    [[ $cmd == *"Or "* ]] && errors+=("contains alternatives prose")
+    [[ $cmd == *"you can"* ]] && errors+=("contains explanation")
+    [[ $cmd == *"Note:"* ]] && errors+=("contains note")
+    [[ $cmd == *"#"* && $cmd != *"xargs"* ]] && errors+=("contains comment")
+    [[ ! $cmd =~ ^[a-zA-Z./\(] ]] && errors+=("doesn't start like a command")
+  done
+
+  # Text-mode providers (copilot, claude-code) cannot detect destructiveness
+  if [[ $category == dangerous && $ZSH_AI_CMD_PROVIDER != copilot && $ZSH_AI_CMD_PROVIDER != claude-code ]]; then
+    [[ ${flags[1]:-} == D ]] || errors+=("dangerous request not flagged destructive")
+  fi
 
   if (( ${#errors[@]} > 0 )); then
     print -r -- "${(j:, :)errors}"
@@ -152,18 +180,20 @@ run_test() {
   fi
 
   local validation
-  validation=$(validate_output "$output")
+  validation=$(validate_output "$output" "$category")
   local valid_status=$?
 
   if (( valid_status == 0 )); then
     print -P "%F{green}PASS%f"
-    print "  -> $output"
     ((PASS++))
   else
     print -P "%F{red}FAIL%f ($validation)"
-    print "  -> $output"
     ((FAIL++))
   fi
+  local line
+  for line in "${(@f)output}"; do
+    print "  -> $line"
+  done
 }
 
 get_model_name() {

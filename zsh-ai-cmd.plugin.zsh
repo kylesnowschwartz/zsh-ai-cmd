@@ -13,6 +13,7 @@ typeset -g ZSH_AI_CMD_KEY=${ZSH_AI_CMD_KEY:-'^z'}
 typeset -g ZSH_AI_CMD_DEBUG=${ZSH_AI_CMD_DEBUG:-false}
 typeset -g ZSH_AI_CMD_LOG=${ZSH_AI_CMD_LOG:-/tmp/zsh-ai-cmd.log}
 typeset -g ZSH_AI_CMD_HIGHLIGHT=${ZSH_AI_CMD_HIGHLIGHT:-'fg=8'}
+typeset -g ZSH_AI_CMD_HIGHLIGHT_DESTRUCTIVE=${ZSH_AI_CMD_HIGHLIGHT_DESTRUCTIVE:-'fg=red'}
 
 # Keychain entry name for API key lookup. Single quotes delay ${provider} expansion
 # until _zsh_ai_cmd_get_key() runs. Override with a literal name if needed.
@@ -34,6 +35,12 @@ typeset -g ZSH_AI_CMD_ANTHROPIC_MODEL=${ZSH_AI_CMD_ANTHROPIC_MODEL:-$ZSH_AI_CMD_
 # Internal State
 # ============================================================================
 typeset -g _ZSH_AI_CMD_SUGGESTION=""
+
+# All suggestions from the last API call (primary + alternatives), with a
+# parallel destructive-flag array. Trigger key cycles through them while active.
+typeset -ga _ZSH_AI_CMD_SUGGESTIONS=()
+typeset -ga _ZSH_AI_CMD_DESTRUCTIVE=()
+typeset -g _ZSH_AI_CMD_INDEX=1
 
 # OS detection (lazy-loaded on first API call)
 typeset -g _ZSH_AI_CMD_OS=""
@@ -118,17 +125,27 @@ _zsh_ai_cmd_show_ghost() {
   }
 
   if [[ -n $suggestion && $suggestion != $BUFFER ]]; then
+    local destructive=${_ZSH_AI_CMD_DESTRUCTIVE[_ZSH_AI_CMD_INDEX]:-0}
+    local counter=""
+    (( ${#_ZSH_AI_CMD_SUGGESTIONS} > 1 )) && counter="  ⟲ ${_ZSH_AI_CMD_INDEX}/${#_ZSH_AI_CMD_SUGGESTIONS}"
     if [[ $suggestion == ${BUFFER}* ]]; then
-      # Suggestion is completion of current buffer - show suffix
-      POSTDISPLAY="${suggestion#$BUFFER}"
+      # Suggestion is completion of current buffer - show suffix. The ⚠/⟲
+      # annotations are display-only (Tab inserts $suggestion, not POSTDISPLAY);
+      # ⚠ is appended so destructive keeps a non-color cue in this branch too
+      (( destructive )) && counter="  ⚠${counter}"
+      POSTDISPLAY="${suggestion#$BUFFER}${counter}"
     else
-      # Suggestion is different - show with tab hint
-      POSTDISPLAY="  ⇥  ${suggestion}"
+      # Suggestion is different - show with tab hint (⚠ marks destructive)
+      local warn=""
+      (( destructive )) && warn="⚠ "
+      POSTDISPLAY="  ⇥  ${warn}${suggestion}${counter}"
     fi
     # Apply highlight (uses tracked entry for clean removal, no collision with other plugins)
+    local highlight=$ZSH_AI_CMD_HIGHLIGHT
+    (( destructive )) && highlight=$ZSH_AI_CMD_HIGHLIGHT_DESTRUCTIVE
     local start=$#BUFFER
     local end=$(( start + $#POSTDISPLAY ))
-    _ZSH_AI_CMD_LAST_HIGHLIGHT="$start $end $ZSH_AI_CMD_HIGHLIGHT"
+    _ZSH_AI_CMD_LAST_HIGHLIGHT="$start $end $highlight"
     region_highlight+=("$_ZSH_AI_CMD_LAST_HIGHLIGHT")
     [[ $ZSH_AI_CMD_DEBUG == true ]] && print -- "show_ghost: POSTDISPLAY='$POSTDISPLAY'" >> $ZSH_AI_CMD_LOG
   else
@@ -160,6 +177,9 @@ _zsh_ai_cmd_deactivate() {
   (( ! _ZSH_AI_CMD_ACTIVE )) && return
   _ZSH_AI_CMD_ACTIVE=0
   _ZSH_AI_CMD_SUGGESTION=""
+  _ZSH_AI_CMD_SUGGESTIONS=()
+  _ZSH_AI_CMD_DESTRUCTIVE=()
+  _ZSH_AI_CMD_INDEX=1
   _ZSH_AI_CMD_BUFFER_AT_SUGGESTION=""
   POSTDISPLAY=""
 
@@ -180,6 +200,17 @@ _zsh_ai_cmd_deactivate() {
   else
     bindkey '^[[C' forward-char
   fi
+}
+
+# Advance to the next suggestion and redraw the ghost. Wraps around; no-op
+# when there is only one suggestion.
+_zsh_ai_cmd_cycle() {
+  local count=${#_ZSH_AI_CMD_SUGGESTIONS}
+  (( count <= 1 )) && return
+  _ZSH_AI_CMD_INDEX=$(( _ZSH_AI_CMD_INDEX % count + 1 ))
+  _ZSH_AI_CMD_SUGGESTION=${_ZSH_AI_CMD_SUGGESTIONS[_ZSH_AI_CMD_INDEX]}
+  _zsh_ai_cmd_show_ghost "$_ZSH_AI_CMD_SUGGESTION"
+  zle -R
 }
 
 _zsh_ai_cmd_pre_redraw() {
@@ -246,6 +277,17 @@ _zsh_ai_cmd_call_api() {
 # ============================================================================
 
 _zsh_ai_cmd_suggest() {
+  # While a suggestion is showing, the trigger key cycles through alternatives;
+  # with a single suggestion it falls through to a fresh query (re-roll),
+  # matching the pre-cycling behavior of repeat Ctrl+Z
+  if (( _ZSH_AI_CMD_ACTIVE )); then
+    if (( ${#_ZSH_AI_CMD_SUGGESTIONS} > 1 )); then
+      _zsh_ai_cmd_cycle
+      return
+    fi
+    _zsh_ai_cmd_deactivate
+  fi
+
   [[ -z $BUFFER ]] && return
 
   _zsh_ai_cmd_get_key || { BUFFER=""; zle accept-line; return 1; }
@@ -269,14 +311,39 @@ _zsh_ai_cmd_suggest() {
   done
   wait $pid 2>/dev/null
 
-  # Read and sanitize result (security: strip control chars, newlines, escapes)
-  local suggestion
-  suggestion=$(_zsh_ai_cmd_sanitize "$(<"$tmpfile")")
+  # Parse provider wire format: one suggestion per line, "D<TAB>command" for
+  # destructive commands, "S<TAB>command" otherwise. Each command is sanitized
+  # individually (security: strip control chars, newlines, escapes).
+  local raw
+  raw=$(<"$tmpfile")
   rm -f "$tmpfile"
 
-  if [[ -n $suggestion ]]; then
-    _ZSH_AI_CMD_SUGGESTION=$suggestion
-    _zsh_ai_cmd_show_ghost "$suggestion"
+  local -a suggestions destructive
+  local line flag cmd existing
+  for line in "${(@f)raw}"; do
+    # Fail closed: every provider emits the flag, so an unmarked line is stray
+    # output (CLI noise, partial response) — drop it, never show it as "safe"
+    [[ $line != [DS]$'\t'* ]] && continue
+    flag=${line[1]}
+    cmd=$(_zsh_ai_cmd_sanitize "${line#?$'\t'}")
+    [[ -z $cmd ]] && continue
+    existing=${suggestions[(Ie)$cmd]}
+    if (( existing )); then
+      # Duplicate command with contradictory flags: keep the destructive one
+      [[ $flag == D ]] && destructive[existing]=1
+      continue
+    fi
+    suggestions+=("$cmd")
+    if [[ $flag == D ]]; then destructive+=(1); else destructive+=(0); fi
+    (( ${#suggestions} == 3 )) && break         # primary + 2 alternatives max
+  done
+
+  if (( ${#suggestions} )); then
+    _ZSH_AI_CMD_SUGGESTIONS=("${(@)suggestions}")
+    _ZSH_AI_CMD_DESTRUCTIVE=("${(@)destructive}")
+    _ZSH_AI_CMD_INDEX=1
+    _ZSH_AI_CMD_SUGGESTION=${suggestions[1]}
+    _zsh_ai_cmd_show_ghost "$_ZSH_AI_CMD_SUGGESTION"
     _zsh_ai_cmd_activate
     zle -R
   else

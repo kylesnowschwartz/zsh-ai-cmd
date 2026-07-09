@@ -63,7 +63,7 @@ Available: $_ZSH_AI_CMD_CAPS
 context="${(e)context_template}"
 prompt="${_ZSH_AI_CMD_PROMPT}"$'\n'"${context}"
 
-case $ZSH_AI_CMD_PROVIDER in
+raw=$(case $ZSH_AI_CMD_PROVIDER in
   anthropic)   _zsh_ai_cmd_anthropic_call "$input" "$prompt" ;;
   openai)      _zsh_ai_cmd_openai_call "$input" "$prompt" ;;
   ollama)      _zsh_ai_cmd_ollama_call "$input" "$prompt" ;;
@@ -72,4 +72,16 @@ case $ZSH_AI_CMD_PROVIDER in
   copilot)     _zsh_ai_cmd_copilot_call "$input" "$prompt" ;;
   claude-code) _zsh_ai_cmd_claude_code_call "$input" "$prompt" ;;
   *) print -u2 "Unknown provider: $ZSH_AI_CMD_PROVIDER"; exit 1 ;;
-esac
+esac)
+rc=$?
+(( rc != 0 )) && exit $rc
+
+# Providers emit the wire format (one "D<TAB>command" / "S<TAB>command" line
+# per suggestion). The benchmark scores the primary suggestion only: take the
+# first line and strip the destructive/safe flag. (Real array variable, not a
+# nested ${${(@f)...}[1]}: that collapses to a scalar on single-line input and
+# [1] would index the first character.)
+typeset -a _wire_lines
+_wire_lines=("${(@f)raw}")
+first="${_wire_lines[1]}"
+print -r -- "${first#[DS]$'\t'}"

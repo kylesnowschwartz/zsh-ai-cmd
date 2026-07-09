@@ -7,16 +7,18 @@ typeset -g ZSH_AI_CMD_OPENAI_BASE_URL=${ZSH_AI_CMD_OPENAI_BASE_URL:-'https://api
 
 _zsh_ai_cmd_openai_call() {
   local input=$1
-  local prompt=$2
+  local prompt=$2"$_ZSH_AI_CMD_PROMPT_STRUCTURED"
 
+  # max_completion_tokens sized for primary + 2 alternatives of long commands
   local payload
   payload=$(command jq -nc \
     --arg model "$ZSH_AI_CMD_OPENAI_MODEL" \
     --arg system "$prompt" \
     --arg content "$input" \
+    --argjson schema "$_ZSH_AI_CMD_SCHEMA" \
     '{
       model: $model,
-      max_completion_tokens: 256,
+      max_completion_tokens: 1024,
       messages: [
         {role: "system", content: $system},
         {role: "user", content: $content}
@@ -25,14 +27,7 @@ _zsh_ai_cmd_openai_call() {
         type: "json_schema",
         json_schema: {
           name: "shell_command",
-          schema: {
-            type: "object",
-            properties: {
-              command: {type: "string", description: "The shell command"}
-            },
-            required: ["command"],
-            additionalProperties: false
-          },
+          schema: $schema,
           strict: true
         }
       }
@@ -64,8 +59,8 @@ _zsh_ai_cmd_openai_call() {
     return 1
   fi
 
-  # Extract command from response
-  print -r -- "$response" | command jq -re '.choices[0].message.content | fromjson | .command // empty' 2>/dev/null
+  # Extract suggestions from response (wire format: D/S<TAB>command per line)
+  print -r -- "$response" | command jq -re ".choices[0].message.content | fromjson | $_ZSH_AI_CMD_JQ_EMIT" 2>/dev/null
 }
 
 _zsh_ai_cmd_openai_key_error() {

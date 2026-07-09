@@ -32,11 +32,13 @@ Set provider via `ZSH_AI_CMD_PROVIDER='openai'` (default: `anthropic`).
 ### API Key Retrieval
 
 Keys are retrieved in this order:
+
 1. Environment variables (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, etc.)
 2. Custom command (`ZSH_AI_CMD_API_KEY_COMMAND` with `${provider}` expansion) — if configured
 3. macOS Keychain (`ZSH_AI_CMD_KEYCHAIN_NAME`)
 
 **Example custom command**:
+
 ```sh
 export ZSH_AI_CMD_API_KEY_COMMAND='secret-tool lookup service ${provider}'
 ```
@@ -44,22 +46,27 @@ export ZSH_AI_CMD_API_KEY_COMMAND='secret-tool lookup service ${provider}'
 ### Provider Implementation
 
 Each provider file exports two functions:
-- `_zsh_ai_cmd_<provider>_call "$input" "$prompt"` - Makes API call, prints command to stdout
+
+- `_zsh_ai_cmd_<provider>_call "$input" "$prompt"` - Makes API call, prints suggestions to stdout in the wire format: one suggestion per line, `D<TAB>command` (destructive) or `S<TAB>command` (safe), primary command first then up to 2 alternatives
 - `_zsh_ai_cmd_<provider>_key_error` - Prints setup instructions when API key missing
 
-All providers use structured outputs (JSON schema) where supported for reliable command extraction. The system prompt is shared across providers via `$_ZSH_AI_CMD_PROMPT` from `prompt.zsh`.
+All providers use structured outputs (JSON schema) where supported for reliable command extraction: `{command, destructive, alternatives: [{command, destructive}]}`. The schema lives once in `prompt.zsh` as `$_ZSH_AI_CMD_SCHEMA` (Gemini's provider strips `additionalProperties` inline for its dialect). The system prompt is shared across providers via `$_ZSH_AI_CMD_PROMPT` from `prompt.zsh`; structured providers append `$_ZSH_AI_CMD_PROMPT_STRUCTURED` and convert JSON to the wire format with the shared `$_ZSH_AI_CMD_JQ_EMIT` jq filter (hardened against shape drift from schema-less json_object providers). Text-mode providers (`copilot`, `claude-code`) emit a single `S<TAB>command` line. The widget drops lines without a D/S flag (fail-closed) and consumers outside the plugin (`benchmark/call.zsh`, mock tests) must parse the wire format.
 
 ### Core Components
 
 **Core Flow:**
+
 - **Widget function** `_zsh_ai_cmd_suggest`: Main entry point bound to keybinding. Captures buffer text, shows spinner, calls API, displays result as ghost text via `POSTDISPLAY`.
 - **API call** `_zsh_ai_cmd_call_api`: Background curl with animated braille spinner. Uses ZLE redraw for UI updates during blocking wait.
 - **Key retrieval** `_zsh_ai_cmd_get_key`: Lazy-loads API key from env var or macOS Keychain.
 
 **Ghost Text System:**
-- **`_zsh_ai_cmd_show_ghost`**: Displays suggestion in `POSTDISPLAY`. If suggestion extends current buffer, shows suffix only. Otherwise shows ` ⇥ suggestion`.
+
+- **`_zsh_ai_cmd_show_ghost`**: Displays suggestion in `POSTDISPLAY`. If suggestion extends current buffer, shows suffix only. Otherwise shows `⇥ suggestion`. When multiple suggestions exist, appends a `⟲ i/n` cycle counter; destructive suggestions get a `⚠` marker and the `ZSH_AI_CMD_HIGHLIGHT_DESTRUCTIVE` tint (default `fg=red`).
+- **`_zsh_ai_cmd_cycle`**: Pressing the trigger key while a suggestion is showing advances to the next alternative (wraps around).
 
 **State Machine:**
+
 - **`_zsh_ai_cmd_activate`**: Called after suggestion shown. Captures current Tab/right-arrow bindings, temporarily overrides them.
 - **`_zsh_ai_cmd_deactivate`**: Restores original bindings, clears ghost text and state. Called on accept or buffer divergence.
 - **`_zsh_ai_cmd_pre_redraw`**: Hook that detects buffer changes. If buffer diverges from suggestion, deactivates.
@@ -83,6 +90,7 @@ API response validation tests live in @test-api.sh:
 ```
 
 Manual testing:
+
 ```sh
 source ./zsh-ai-cmd.plugin.zsh
 # Type natural language, press Ctrl+Z
@@ -90,6 +98,7 @@ list files modified today<Ctrl+Z>
 ```
 
 Enable debug logging:
+
 ```sh
 ZSH_AI_CMD_DEBUG=true
 tail -f ${ZSH_AI_CMD_LOG:-/tmp/zsh-ai-cmd.log}
@@ -105,6 +114,7 @@ tail -f ${ZSH_AI_CMD_LOG:-/tmp/zsh-ai-cmd.log}
 ## ZLE Widget Constraints
 
 When modifying the spinner or UI code:
+
 - `zle -R` forces redraw within widget context
 - `zle -M` shows messages in minibuffer
 - Background jobs need `NO_NOTIFY NO_MONITOR` to suppress job control noise
@@ -112,6 +122,7 @@ When modifying the spinner or UI code:
 
 **Dormant/Active State Machine:**
 The plugin uses a state machine to avoid conflicts with other plugins (like zsh-autosuggestions):
+
 - **Dormant** (default): Only `Ctrl+Z` trigger bound. Tab/right-arrow work normally.
 - **Active** (after Ctrl+Z shows suggestion): Tab/right-arrow temporarily bound to accept. Uses `zle-line-pre-redraw` hook to detect buffer changes.
 - **Deactivate** (on accept/dismiss): Restore original bindings, clear state.
@@ -123,6 +134,7 @@ This design avoids permanent widget wrapping, so other plugins' `self-insert` wr
 zsh-ai-cmd follows **Semantic Versioning** (`vMAJOR.MINOR.PATCH`) consistent with the zsh ecosystem (zsh-autosuggestions, powerlevel10k, zoxide).
 
 ### Version Files
+
 - **VERSION** — Single line: `v0.1.0` (for runtime version checking, see `cat VERSION`)
 - **CHANGELOG.md** — Detailed changelog per version
 - **git tags** — Source of truth for releases
@@ -130,14 +142,17 @@ zsh-ai-cmd follows **Semantic Versioning** (`vMAJOR.MINOR.PATCH`) consistent wit
 ### Releasing a New Version
 
 #### Step 1: Prepare Changes
+
 - Ensure all tests pass: `./test-api.sh` and `./test-api-key-command.sh`
 - Review commits since last release: `git log --oneline v0.1.0..HEAD`
 - Update CHANGELOG.md with new version section
 
 #### Step 2: Bump Version
+
 Use the versioning command: `claude /versioning bump MAJOR|MINOR|PATCH`
 
 Or manually:
+
 ```sh
 # Update VERSION file
 echo "v0.2.0" > VERSION
@@ -148,6 +163,7 @@ git commit -m "chore: bump version to v0.2.0"
 ```
 
 #### Step 3: Tag and Push
+
 ```sh
 # Create annotated tag with release notes
 git tag -a v0.2.0 -m "Release v0.2.0: [feature summary]
@@ -165,6 +181,7 @@ git push origin main v0.2.0
 ```
 
 #### Step 4: Create GitHub Release (Optional)
+
 ```sh
 # Create GitHub release from tag (adds release notes for visibility)
 gh release create v0.2.0 --notes "Release v0.2.0: [summary from CHANGELOG.md]"
@@ -177,11 +194,13 @@ gh release create v0.2.0 --notes "Release v0.2.0: [summary from CHANGELOG.md]"
 - **PATCH** (v0.1.1): Bug fixes, no new features
 
 Examples:
+
 - Custom command feature (new functionality, backwards compatible) → MINOR
 - Provider normalization (bug fix) → PATCH
 - Change API key lookup order → MAJOR
 
 ### Checking Current Version
+
 ```sh
 # Check VERSION file
 cat VERSION
@@ -191,6 +210,7 @@ git describe --tags --abbrev=0
 ```
 
 ### Testing Before Release
+
 ```sh
 # Run feature tests
 ./test-api-key-command.sh

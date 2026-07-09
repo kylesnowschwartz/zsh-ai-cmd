@@ -20,7 +20,7 @@ _zsh_ai_cmd_lmstudio_available() {
 
 _zsh_ai_cmd_lmstudio_call() {
   local input="$1"
-  local prompt="$2"
+  local prompt="$2$_ZSH_AI_CMD_PROMPT_STRUCTURED"
 
   if [[ -z "$ZSH_AI_CMD_LMSTUDIO_HOST" ]]; then
     _zsh_ai_cmd_lmstudio_key_error
@@ -32,6 +32,7 @@ _zsh_ai_cmd_lmstudio_call() {
     --arg model "$ZSH_AI_CMD_LMSTUDIO_MODEL" \
     --arg system "$prompt" \
     --arg content "$input" \
+    --argjson schema "$_ZSH_AI_CMD_SCHEMA" \
     '{
       model: $model,
       messages: [
@@ -44,14 +45,7 @@ _zsh_ai_cmd_lmstudio_call() {
         json_schema: {
           name: "shell_command",
           strict: true,
-          schema: {
-            type: "object",
-            properties: {
-              command: {type: "string", description: "The shell command"}
-            },
-            required: ["command"],
-            additionalProperties: false
-          }
+          schema: $schema
         }
       }
     }')
@@ -82,5 +76,6 @@ _zsh_ai_cmd_lmstudio_call() {
     return 1
   fi
 
-  print -r -- "$response" | command jq -re '.choices[0].message.content | fromjson | .command // empty' 2>/dev/null
+  # Wire format: D/S<TAB>command per line
+  print -r -- "$response" | command jq -re ".choices[0].message.content | fromjson | $_ZSH_AI_CMD_JQ_EMIT" 2>/dev/null
 }

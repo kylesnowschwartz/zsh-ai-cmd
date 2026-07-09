@@ -5,26 +5,19 @@ typeset -g ZSH_AI_CMD_ANTHROPIC_MODEL=${ZSH_AI_CMD_ANTHROPIC_MODEL:-'claude-haik
 
 _zsh_ai_cmd_anthropic_call() {
   local input=$1
-  local prompt=$2
+  local prompt=$2"$_ZSH_AI_CMD_PROMPT_STRUCTURED"
 
-  local schema='{
-    "type": "object",
-    "properties": {
-      "command": {"type": "string", "description": "The shell command"}
-    },
-    "required": ["command"],
-    "additionalProperties": false
-  }'
-
+  # max_tokens sized for the full structured payload: primary + 2 alternatives
+  # of long commands (ffmpeg/rsync pipelines) plus JSON scaffolding
   local payload
   payload=$(command jq -nc \
     --arg model "$ZSH_AI_CMD_ANTHROPIC_MODEL" \
     --arg system "$prompt" \
     --arg content "$input" \
-    --argjson schema "$schema" \
+    --argjson schema "$_ZSH_AI_CMD_SCHEMA" \
     '{
       model: $model,
-      max_tokens: 256,
+      max_tokens: 1024,
       system: $system,
       messages: [{role: "user", content: $content}],
       output_format: {type: "json_schema", schema: $schema}
@@ -58,8 +51,8 @@ _zsh_ai_cmd_anthropic_call() {
     return 1
   fi
 
-  # Extract command from structured output
-  print -r -- "$response" | command jq -re '.content[0].text | fromjson | .command // empty' 2>/dev/null
+  # Extract suggestions from structured output (wire format: D/S<TAB>command per line)
+  print -r -- "$response" | command jq -re ".content[0].text | fromjson | $_ZSH_AI_CMD_JQ_EMIT" 2>/dev/null
 }
 
 _zsh_ai_cmd_anthropic_key_error() {

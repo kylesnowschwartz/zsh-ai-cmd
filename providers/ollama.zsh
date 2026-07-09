@@ -6,13 +6,14 @@ typeset -g ZSH_AI_CMD_OLLAMA_HOST=${ZSH_AI_CMD_OLLAMA_HOST:-'localhost:11434'}
 
 _zsh_ai_cmd_ollama_call() {
   local input=$1
-  local prompt=$2
+  local prompt=$2"$_ZSH_AI_CMD_PROMPT_STRUCTURED"
 
   local payload
   payload=$(command jq -nc \
     --arg model "$ZSH_AI_CMD_OLLAMA_MODEL" \
     --arg system "$prompt" \
     --arg content "$input" \
+    --argjson schema "$_ZSH_AI_CMD_SCHEMA" \
     '{
       model: $model,
       messages: [
@@ -20,13 +21,7 @@ _zsh_ai_cmd_ollama_call() {
         {role: "user", content: $content}
       ],
       stream: false,
-      format: {
-        type: "object",
-        properties: {
-          command: {type: "string", description: "The shell command"}
-        },
-        required: ["command"]
-      }
+      format: $schema
     }')
 
   local response
@@ -54,8 +49,9 @@ _zsh_ai_cmd_ollama_call() {
     return 1
   fi
 
-  # Extract command - structured output ensures valid JSON in .message.content
-  print -r -- "$response" | command jq -re '.message.content | fromjson | .command // empty' 2>/dev/null
+  # Extract suggestions - structured output ensures valid JSON in .message.content
+  # (wire format: D/S<TAB>command per line)
+  print -r -- "$response" | command jq -re ".message.content | fromjson | $_ZSH_AI_CMD_JQ_EMIT" 2>/dev/null
 }
 
 _zsh_ai_cmd_ollama_key_error() {
