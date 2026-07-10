@@ -55,7 +55,7 @@ _zsh_ai_cmd_gemini_call() {
   fi
 
   # Extract suggestions from response (wire format: D/S<TAB>command per line)
-  print -r -- "$response" | command jq -re ".candidates[0].content.parts[0].text | fromjson | $_ZSH_AI_CMD_JQ_EMIT" 2>/dev/null
+  _zsh_ai_cmd_extract "$response" '.candidates[0].content.parts[0].text'
 }
 
 _zsh_ai_cmd_gemini_key_error() {

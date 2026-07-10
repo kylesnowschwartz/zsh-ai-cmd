@@ -52,7 +52,7 @@ _zsh_ai_cmd_anthropic_call() {
   fi
 
   # Extract suggestions from structured output (wire format: D/S<TAB>command per line)
-  print -r -- "$response" | command jq -re ".content[0].text | fromjson | $_ZSH_AI_CMD_JQ_EMIT" 2>/dev/null
+  _zsh_ai_cmd_extract "$response" '.content[0].text'
 }
 
 _zsh_ai_cmd_anthropic_key_error() {

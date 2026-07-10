@@ -32,6 +32,22 @@ All notable changes to zsh-ai-cmd are documented in this file.
 - Benchmark harness (`benchmark/call.zsh`) and mock-server test updated for
   the wire format
 
+### Fixed
+
+- Destructive verdict is no longer dropped when the model echoes the typed
+  buffer verbatim: the ghost now shows an annotation-only `⚠` (plus cycle
+  counter) instead of nothing
+
+### Internal
+
+- Suggestion cap is a named constant (`$_ZSH_AI_CMD_MAX_SUGGESTIONS`) shared
+  by the plugin and test suite; text-mode providers are declared once in
+  `$_ZSH_AI_CMD_TEXT_PROVIDERS` instead of hardcoded name checks
+- Removed the derivable `_ZSH_AI_CMD_SUGGESTION` scalar — the current
+  suggestion is always `_ZSH_AI_CMD_SUGGESTIONS[_ZSH_AI_CMD_INDEX]`
+- The six jq providers share one `_zsh_ai_cmd_extract` response helper
+- Header/banner comments updated for cycling and re-roll behavior
+
 ## [v0.3.0] - 2026-06-09
 
 ### Added

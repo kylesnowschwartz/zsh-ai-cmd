@@ -77,5 +77,5 @@ _zsh_ai_cmd_lmstudio_call() {
   fi
 
   # Wire format: D/S<TAB>command per line
-  print -r -- "$response" | command jq -re ".choices[0].message.content | fromjson | $_ZSH_AI_CMD_JQ_EMIT" 2>/dev/null
+  _zsh_ai_cmd_extract "$response" '.choices[0].message.content'
 }

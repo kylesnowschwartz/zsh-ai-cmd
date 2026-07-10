@@ -55,7 +55,7 @@ Respond with valid JSON only. Format: {\"command\": \"best command\", \"destruct
   fi
 
   # Extract suggestions from response (wire format: D/S<TAB>command per line)
-  print -r -- "$response" | command jq -re ".choices[0].message.content | fromjson | $_ZSH_AI_CMD_JQ_EMIT" 2>/dev/null
+  _zsh_ai_cmd_extract "$response" '.choices[0].message.content'
 }
 
 _zsh_ai_cmd_deepseek_key_error() {

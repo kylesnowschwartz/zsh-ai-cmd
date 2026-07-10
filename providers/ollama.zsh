@@ -51,7 +51,7 @@ _zsh_ai_cmd_ollama_call() {
 
   # Extract suggestions - structured output ensures valid JSON in .message.content
   # (wire format: D/S<TAB>command per line)
-  print -r -- "$response" | command jq -re ".message.content | fromjson | $_ZSH_AI_CMD_JQ_EMIT" 2>/dev/null
+  _zsh_ai_cmd_extract "$response" '.message.content'
 }
 
 _zsh_ai_cmd_ollama_key_error() {

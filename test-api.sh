@@ -114,7 +114,7 @@ validate_output() {
   done
 
   (( ${#cmds[@]} == 0 )) && errors+=("no commands")
-  (( ${#cmds[@]} > 3 )) && errors+=("more than 3 suggestions")
+  (( ${#cmds[@]} > _ZSH_AI_CMD_MAX_SUGGESTIONS )) && errors+=("more than $_ZSH_AI_CMD_MAX_SUGGESTIONS suggestions")
 
   local cmd
   for cmd in "${cmds[@]}"; do
@@ -127,8 +127,8 @@ validate_output() {
     [[ ! $cmd =~ ^[a-zA-Z./\(] ]] && errors+=("doesn't start like a command")
   done
 
-  # Text-mode providers (copilot, claude-code) cannot detect destructiveness
-  if [[ $category == dangerous && $ZSH_AI_CMD_PROVIDER != copilot && $ZSH_AI_CMD_PROVIDER != claude-code ]]; then
+  # Text-mode providers cannot detect destructiveness (see prompt.zsh)
+  if [[ $category == dangerous ]] && (( ! ${_ZSH_AI_CMD_TEXT_PROVIDERS[(Ie)$ZSH_AI_CMD_PROVIDER]} )); then
     [[ ${flags[1]:-} == D ]] || errors+=("dangerous request not flagged destructive")
   fi
 

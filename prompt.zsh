@@ -66,6 +66,14 @@ User: edit crontab with nano
 EDITOR=nano command crontab -e
 </examples>'
 
+# Wire-format protocol constants, shared by the plugin, test-api.sh, and
+# benchmark/call.zsh (all of which source this file).
+# Maximum suggestions shown/accepted: primary + 2 alternatives.
+typeset -g _ZSH_AI_CMD_MAX_SUGGESTIONS=3
+# Providers without structured output: single suggestion, no destructive
+# detection. Consulted wherever behavior differs by provider capability.
+typeset -ga _ZSH_AI_CMD_TEXT_PROVIDERS=(copilot claude-code)
+
 # Extra guidance for providers with structured (JSON) output. Text-mode
 # providers (copilot, claude-code) must NOT receive this: they rely on the
 # base prompt's single-command rule.
@@ -117,6 +125,15 @@ typeset -g _ZSH_AI_CMD_JQ_EMIT='([{command, destructive}]
   | .[]
   | select((.command | type) == "string" and (.command | length) > 0)
   | (if .destructive == true or .destructive == "true" then "D" else "S" end) + "\t" + (.command | gsub("\n"; " "))'
+
+# Shared response extractor for the six jq-based providers: pulls the
+# provider-specific JSON string at PATH out of RESPONSE, parses it, and emits
+# the wire format (D/S<TAB>command per line).
+_zsh_ai_cmd_extract() {
+  # NOTE: arg 2 must not be named "path" — zsh ties that name to $PATH
+  local response=$1 jq_path=$2
+  print -r -- "$response" | command jq -re "$jq_path | fromjson | $_ZSH_AI_CMD_JQ_EMIT" 2>/dev/null
+}
 
 typeset -g _ZSH_AI_CMD_CONTEXT='<context>
 OS: $_ZSH_AI_CMD_OS
