@@ -2,7 +2,7 @@
 
 All notable changes to zsh-ai-cmd are documented in this file.
 
-## [Unreleased]
+## [v0.4.0] - 2026-07-10
 
 ### Added
 
