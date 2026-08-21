@@ -22,12 +22,15 @@ The main plugin lives in @zsh-ai-cmd.plugin.zsh with provider implementations in
  | LMStudio   | `providers/lmstudio.zsh`  | `qwen2.5-coder-7b-instruct`    | (none - local)      | `ZSH_AI_CMD_LMSTUDIO_HOST`    |
  | Copilot    | `providers/copilot.zsh`   | `gpt-4o`                       | (none - local)      | `ZSH_AI_CMD_COPILOT_HOST`     |
  | Claude Code | `providers/claude-code.zsh` | (CLI default)               | (none - subscription) |                             |
+ | Bedrock    | `providers/bedrock.zsh`   | `openai.gpt-5.6-luna`          | `BEDROCK_API_KEY`   | `ZSH_AI_CMD_BEDROCK_ENDPOINT` |
 
 Set provider via `ZSH_AI_CMD_PROVIDER='openai'` (default: `anthropic`).
 
 **Note:** Copilot requires [copilot-api](https://github.com/ericc-ch/copilot-api) to be running. Install and start with `npx copilot-api start`.
 
 **Note:** Claude Code uses your Claude subscription (Max/Pro/Enterprise) via the [Claude Code CLI](https://github.com/anthropics/claude-code). Install with `npm install -g @anthropic-ai/claude-code` and authenticate with `claude login`. Slower than direct API providers (~5s vs ~1-3s) due to CLI startup overhead.
+
+**Note:** Bedrock is opt-in via `ZSH_AI_CMD_PROVIDER='bedrock'` and requires the chosen model to be enabled in the Region: `ZSH_AI_CMD_BEDROCK_REGION` defaults to `us-west-2`, and `AWS_REGION` is never inherited. Credentials are an Amazon Bedrock API key on the standard chain (`BEDROCK_API_KEY` → `ZSH_AI_CMD_API_KEY_COMMAND` → Keychain), so the provider adds no credential machinery of its own. AWS profile / SigV4 credentials are unsupported: they are multi-valued and expiring, which a single-string chain cannot express.
 
 ### API Key Retrieval
 

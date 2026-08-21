@@ -28,6 +28,7 @@ source "${PLUGIN_DIR}/providers/deepseek.zsh"
 source "${PLUGIN_DIR}/providers/gemini.zsh"
 source "${PLUGIN_DIR}/providers/copilot.zsh"
 source "${PLUGIN_DIR}/providers/claude-code.zsh"
+source "${PLUGIN_DIR}/providers/bedrock.zsh"
 
 provider="${(L)ZSH_AI_CMD_PROVIDER}"
 if [[ $provider != ollama && $provider != copilot && $provider != claude-code ]]; then
@@ -71,6 +72,7 @@ raw=$(case $ZSH_AI_CMD_PROVIDER in
   gemini)      _zsh_ai_cmd_gemini_call "$input" "$prompt" ;;
   copilot)     _zsh_ai_cmd_copilot_call "$input" "$prompt" ;;
   claude-code) _zsh_ai_cmd_claude_code_call "$input" "$prompt" ;;
+  bedrock)     _zsh_ai_cmd_bedrock_call "$input" "$prompt" ;;
   *) print -u2 "Unknown provider: $ZSH_AI_CMD_PROVIDER"; exit 1 ;;
 esac)
 rc=$?
