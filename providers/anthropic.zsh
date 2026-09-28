@@ -7,8 +7,9 @@ _zsh_ai_cmd_anthropic_call() {
   local input=$1
   local prompt=$2"$_ZSH_AI_CMD_PROMPT_STRUCTURED"
 
-  # max_tokens sized for the full structured payload: primary + 2 alternatives
-  # of long commands (ffmpeg/rsync pipelines) plus JSON scaffolding
+  # max_tokens covers thinking plus the full structured payload: thinking tokens
+  # count toward the limit, and the answer holds a primary + 2 alternatives of
+  # long commands (ffmpeg/rsync pipelines) plus JSON scaffolding
   local payload
   payload=$(command jq -nc \
     --arg model "$ZSH_AI_CMD_ANTHROPIC_MODEL" \
@@ -17,7 +18,7 @@ _zsh_ai_cmd_anthropic_call() {
     --argjson schema "$_ZSH_AI_CMD_SCHEMA" \
     '{
       model: $model,
-      max_tokens: 1024,
+      max_tokens: 4096,
       system: $system,
       messages: [{role: "user", content: $content}],
       output_format: {type: "json_schema", schema: $schema}
