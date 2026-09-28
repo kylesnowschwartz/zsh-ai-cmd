@@ -14,7 +14,7 @@ The main plugin lives in @zsh-ai-cmd.plugin.zsh with provider implementations in
 
  | Provider   | File                      | Default Model                  | API Key Env Var     | Custom Endpoint Var           |
  | ---------- | ------                    | ---------------                | -----------------   | -------------------           |
- | Anthropic  | `providers/anthropic.zsh` | `claude-haiku-4-5-20251001`    | `ANTHROPIC_API_KEY` |                               |
+ | Anthropic  | `providers/anthropic.zsh` | `claude-opus-5-5`              | `ANTHROPIC_API_KEY` |                               |
  | OpenAI     | `providers/openai.zsh`    | `gpt-5.2-2025-12-11`           | `OPENAI_API_KEY`    | `ZSH_AI_CMD_OPENAI_BASE_URL`  |
  | Gemini     | `providers/gemini.zsh`    | `gemini-3-flash-preview`       | `GEMINI_API_KEY`    |                               |
  | DeepSeek   | `providers/deepseek.zsh`  | `deepseek-chat`                | `DEEPSEEK_API_KEY`  |                               |

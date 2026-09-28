@@ -1,7 +1,7 @@
 # providers/anthropic.zsh - Anthropic Claude API provider
 # Uses structured outputs with JSON schema for reliable command extraction
 
-typeset -g ZSH_AI_CMD_ANTHROPIC_MODEL=${ZSH_AI_CMD_ANTHROPIC_MODEL:-'claude-haiku-4-5-20251001'}
+typeset -g ZSH_AI_CMD_ANTHROPIC_MODEL=${ZSH_AI_CMD_ANTHROPIC_MODEL:-'claude-opus-5-5'}
 
 # Thinking effort (low, medium, high, xhigh, max), sent as output_config.effort.
 # Defaults to low, which keeps thinking models fast; set it to empty to send no

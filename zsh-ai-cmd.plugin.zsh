@@ -29,7 +29,7 @@ typeset -g ZSH_AI_CMD_API_KEY_COMMAND=${ZSH_AI_CMD_API_KEY_COMMAND:-''}
 typeset -g ZSH_AI_CMD_PROVIDER=${ZSH_AI_CMD_PROVIDER:-'anthropic'}
 
 # Legacy model variable maps to anthropic model for backwards compatibility
-typeset -g ZSH_AI_CMD_MODEL=${ZSH_AI_CMD_MODEL:-'claude-haiku-4-5-20251001'}
+typeset -g ZSH_AI_CMD_MODEL=${ZSH_AI_CMD_MODEL:-'claude-opus-5-5'}
 typeset -g ZSH_AI_CMD_ANTHROPIC_MODEL=${ZSH_AI_CMD_ANTHROPIC_MODEL:-$ZSH_AI_CMD_MODEL}
 
 # ============================================================================

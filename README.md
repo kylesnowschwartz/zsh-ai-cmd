@@ -63,7 +63,8 @@ ZSH_AI_CMD_KEYCHAIN_NAME='${provider}-api-key'  # Or use a fixed name: 'my-api-k
 ZSH_AI_CMD_API_KEY_COMMAND=''    # Command to get API key, e.g., 'secret-tool lookup service ${provider}'
 
 # Provider-specific models (defaults shown)
-ZSH_AI_CMD_ANTHROPIC_MODEL='claude-haiku-4-5-20251001'
+ZSH_AI_CMD_ANTHROPIC_MODEL='claude-opus-5-5'
+                                             # Cheaper, faster: ZSH_AI_CMD_ANTHROPIC_MODEL='claude-haiku-4-5-20251001'
 ZSH_AI_CMD_ANTHROPIC_EFFORT='low'            # Thinking effort: low, medium, high, xhigh, max; set to '' to send none
                                              # Ignored for Haiku and Sonnet 4.5 models, which reject it
 ZSH_AI_CMD_OPENAI_MODEL='gpt-5.2-2025-12-11'

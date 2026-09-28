@@ -13,6 +13,15 @@ All notable changes to zsh-ai-cmd are documented in this file.
 - Offline test for the Anthropic request payload and response parsing
   (`test-anthropic-request.sh`)
 
+### Changed
+
+- The default Anthropic model is now `claude-opus-5-5` (with effort `low`),
+  replacing `claude-haiku-4-5-20251001`. If you rely on the default, expect
+  higher cost and latency: Opus 5.5 costs $4/$20 per million input/output
+  tokens against Haiku 4.5's $1/$5, and suggestions take about 2.5–3 s against
+  about 1.5 s. To keep Haiku, set
+  `ZSH_AI_CMD_ANTHROPIC_MODEL='claude-haiku-4-5-20251001'`
+
 ### Fixed
 
 - Anthropic models with thinking always on (such as Claude Opus 5.5) return

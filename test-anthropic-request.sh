@@ -32,7 +32,7 @@ rehash
 
 export ANTHROPIC_API_KEY="test-key-for-mock"
 ZSH_AI_CMD_DEBUG=false
-unset ZSH_AI_CMD_ANTHROPIC_EFFORT
+unset ZSH_AI_CMD_ANTHROPIC_EFFORT ZSH_AI_CMD_ANTHROPIC_MODEL
 source "$SCRIPT_DIR/prompt.zsh"
 source "$SCRIPT_DIR/providers/anthropic.zsh"
 
@@ -129,6 +129,8 @@ print "=== Request payload ==="
 
 mock_response "[$text_block]"
 _zsh_ai_cmd_anthropic_call "delete build dir" "$_ZSH_AI_CMD_PROMPT" >/dev/null
+assert_equals "default model is Claude Opus 5.5" '"claude-opus-5-5"' "$(payload_field '.model')"
+assert_equals "default model gets default effort low" '"low"' "$(payload_field '.output_config.effort')"
 assert_equals "no deprecated output_format" "false" "$(payload_field 'has("output_format")')"
 assert_equals "structured output sent as output_config.format" '"json_schema"' "$(payload_field '.output_config.format.type')"
 assert_equals "schema sent in output_config.format" "$(command jq -c . <<< "$_ZSH_AI_CMD_SCHEMA")" "$(payload_field '.output_config.format.schema')"
