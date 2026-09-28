@@ -16,13 +16,14 @@ git clone https://github.com/kylesnowschwartz/zsh-ai-cmd ~/.zsh-ai-cmd
 source ~/.zsh-ai-cmd/zsh-ai-cmd.plugin.zsh
 
 # Choose your provider (default: anthropic)
-export ZSH_AI_CMD_PROVIDER='anthropic'  # or: openai, gemini, deepseek, ollama, copilot, claude-code
+export ZSH_AI_CMD_PROVIDER='anthropic'  # or: openai, gemini, deepseek, ollama, copilot, claude-code, bedrock
 
 # Set API key for your chosen provider
 export ANTHROPIC_API_KEY='sk-ant-...'
 export OPENAI_API_KEY='sk-...'
 export GEMINI_API_KEY='...'
 export DEEPSEEK_API_KEY='sk-...'
+export BEDROCK_API_KEY='ABSK...'  # Bedrock runs in us-west-2 unless you set ZSH_AI_CMD_BEDROCK_REGION
 # Ollama and Copilot need no key (local services)
 # Claude Code uses your existing Claude subscription (requires: npm install -g @anthropic-ai/claude-code && claude login)
 
@@ -55,7 +56,7 @@ suggestion is dropped, the prompt shows `zsh-ai-cmd: no suggestion`; press
 ## Configuration
 
 ```sh
-ZSH_AI_CMD_PROVIDER='anthropic'              # Provider: anthropic, openai, gemini, deepseek, ollama, copilot, claude-code
+ZSH_AI_CMD_PROVIDER='anthropic'              # Provider: anthropic, openai, gemini, deepseek, ollama, copilot, claude-code, bedrock
 ZSH_AI_CMD_KEY='^z'                          # Trigger key (default: Ctrl+Z)
 ZSH_AI_CMD_HIGHLIGHT='fg=8'                  # Ghost text style (zsh region_highlight format)
 ZSH_AI_CMD_HIGHLIGHT_DESTRUCTIVE='fg=red'    # Ghost text style for destructive suggestions
@@ -82,6 +83,13 @@ ZSH_AI_CMD_OLLAMA_HOST='localhost:11434'    # ollama endpoint
 ZSH_AI_CMD_COPILOT_MODEL='gpt-4o'           # Requires copilot-api (npx copilot-api start)
 ZSH_AI_CMD_COPILOT_HOST='localhost:4141'    # copilot-api endpoint
 ZSH_AI_CMD_CLAUDE_CODE_MODEL=''             # Requires Claude Code CLI (claude login); empty = CLI default
+ZSH_AI_CMD_BEDROCK_REGION='us-west-2'       # AWS_REGION is never inherited
+ZSH_AI_CMD_BEDROCK_MODEL='openai.gpt-5.6-luna'
+ZSH_AI_CMD_BEDROCK_ENDPOINT='mantle'        # mantle | runtime (case-sensitive)
+ZSH_AI_CMD_BEDROCK_API='auto'               # auto | responses | chat_completions (case-sensitive)
+ZSH_AI_CMD_BEDROCK_TIMEOUT=30               # Seconds per request
+ZSH_AI_CMD_BEDROCK_EFFORT='low'             # Reasoning effort: none | low | medium | high
+ZSH_AI_CMD_BEDROCK_MAX_TOKENS=2048          # Output ceiling (reasoning is charged to it)
 ```
 
 ## Custom API Key Retrieval
@@ -123,6 +131,8 @@ All providers pass the test suite (19/19). Full output comparison:
 **Note:** Copilot provider requires [copilot-api](https://github.com/ericc-ch/copilot-api) to be running locally. Install and start with `npx copilot-api start`.
 
 **Note:** Claude Code provider uses your existing Claude subscription (Max/Pro/Enterprise) instead of an API key. Requires [Claude Code CLI](https://github.com/anthropics/claude-code): `npm install -g @anthropic-ai/claude-code && claude login`. Responses are slower (~5s) than direct API providers (~1-3s) due to CLI startup overhead.
+
+**Note:** Bedrock provider needs an [Amazon Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html) in `BEDROCK_API_KEY`, and the model you pick must be enabled for your account in that Region — model access is granted per Region. It runs in `us-west-2`, where model support was measured, and `AWS_REGION` is never inherited since `bedrock-mantle` is not offered in every Region. Set `ZSH_AI_CMD_BEDROCK_REGION` to move it. Which API a model works with varies per model, so `ZSH_AI_CMD_BEDROCK_API='auto'` routes by model ID; models that don't return schema-enforced output are rejected with a reason, as are HTTP errors and truncated or refused completions. Validate a model choice with `./test-api.sh --provider bedrock`. AWS profile / SigV4 credentials are not supported yet.
 
 <details>
 <summary>Click to expand full comparison table</summary>

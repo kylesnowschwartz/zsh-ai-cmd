@@ -110,6 +110,7 @@ source "${0:a:h}/providers/deepseek.zsh"
 source "${0:a:h}/providers/gemini.zsh"
 source "${0:a:h}/providers/copilot.zsh"
 source "${0:a:h}/providers/claude-code.zsh"
+source "${0:a:h}/providers/bedrock.zsh"
 
 # ============================================================================
 # Ghost Text Display
@@ -276,6 +277,7 @@ _zsh_ai_cmd_call_api() {
     gemini)    _zsh_ai_cmd_gemini_call "$input" "$prompt" ;;
     copilot)     _zsh_ai_cmd_copilot_call "$input" "$prompt" ;;
     claude-code) _zsh_ai_cmd_claude_code_call "$input" "$prompt" ;;
+    bedrock)     _zsh_ai_cmd_bedrock_call "$input" "$prompt" ;;
     *) print -u2 "zsh-ai-cmd: Unknown provider '$ZSH_AI_CMD_PROVIDER'"; return 1 ;;
   esac
 }

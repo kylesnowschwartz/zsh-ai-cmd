@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 # test-api.sh - Validate API responses for format compliance
-# Usage: ./test-api.sh [--provider anthropic|openai|ollama|lmstudio|deepseek|gemini|copilot|claude-code]
+# Usage: ./test-api.sh [--provider anthropic|openai|ollama|lmstudio|deepseek|gemini|copilot|claude-code|bedrock]
 
 set -uo pipefail
 
@@ -11,7 +11,7 @@ typeset -g ZSH_AI_CMD_PROVIDER=${ZSH_AI_CMD_PROVIDER:-'anthropic'}
 while [[ $# -gt 0 ]]; do
   case $1 in
     --provider|-p) ZSH_AI_CMD_PROVIDER=$2; shift 2 ;;
-    --help|-h) print "Usage: $0 [--provider anthropic|openai|ollama|lmstudio|deepseek|gemini|copilot|claude-code]"; exit 0 ;;
+    --help|-h) print "Usage: $0 [--provider anthropic|openai|ollama|lmstudio|deepseek|gemini|copilot|claude-code|bedrock]"; exit 0 ;;
     *) print -u2 "Unknown option: $1"; exit 1 ;;
   esac
 done
@@ -38,6 +38,7 @@ source "${SCRIPT_DIR}/providers/deepseek.zsh"
 source "${SCRIPT_DIR}/providers/gemini.zsh"
 source "${SCRIPT_DIR}/providers/copilot.zsh"
 source "${SCRIPT_DIR}/providers/claude-code.zsh"
+source "${SCRIPT_DIR}/providers/bedrock.zsh"
 
 # Get API key for current provider
 get_api_key() {
@@ -160,6 +161,7 @@ PWD: /tmp/test
     gemini)    _zsh_ai_cmd_gemini_call "$input" "$prompt" ;;
     copilot)     _zsh_ai_cmd_copilot_call "$input" "$prompt" ;;
     claude-code) _zsh_ai_cmd_claude_code_call "$input" "$prompt" ;;
+    bedrock)     _zsh_ai_cmd_bedrock_call "$input" "$prompt" ;;
     *) print -u2 "Unknown provider: $ZSH_AI_CMD_PROVIDER"; return 1 ;;
   esac
 }
@@ -206,6 +208,7 @@ get_model_name() {
     gemini)    print "$ZSH_AI_CMD_GEMINI_MODEL" ;;
     copilot)     print "$ZSH_AI_CMD_COPILOT_MODEL" ;;
     claude-code) print "${ZSH_AI_CMD_CLAUDE_CODE_MODEL:-default}" ;;
+    bedrock)     print "$ZSH_AI_CMD_BEDROCK_MODEL (${ZSH_AI_CMD_BEDROCK_ENDPOINT}/${ZSH_AI_CMD_BEDROCK_REGION})" ;;
   esac
 }
 
