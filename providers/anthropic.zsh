@@ -51,8 +51,10 @@ _zsh_ai_cmd_anthropic_call() {
     return 1
   fi
 
-  # Extract suggestions from structured output (wire format: D/S<TAB>command per line)
-  _zsh_ai_cmd_extract "$response" '.content[0].text'
+  # Extract suggestions from structured output (wire format: D/S<TAB>command per line).
+  # Models with thinking enabled put a thinking block before the text block, so
+  # select the first text block rather than content[0]; no text block yields no output.
+  _zsh_ai_cmd_extract "$response" '[.content[] | select(.type == "text")][0].text'
 }
 
 _zsh_ai_cmd_anthropic_key_error() {
