@@ -27,15 +27,17 @@ _zsh_ai_cmd_anthropic_call() {
       max_tokens: 4096,
       system: $system,
       messages: [{role: "user", content: $content}],
-      output_format: {type: "json_schema", schema: $schema}
-    } + (if $effort != "" then {output_config: {effort: $effort}} else {} end)')
+      output_config: (
+        {format: {type: "json_schema", schema: $schema}}
+        + (if $effort != "" then {effort: $effort} else {} end)
+      )
+    }')
 
   local response
   response=$(command curl -sS --max-time 30 "https://api.anthropic.com/v1/messages" \
     -H "Content-Type: application/json" \
     -H "x-api-key: $ANTHROPIC_API_KEY" \
     -H "anthropic-version: 2023-06-01" \
-    -H "anthropic-beta: structured-outputs-2025-11-13" \
     -d "$payload" 2>/dev/null)
 
   # Debug log
