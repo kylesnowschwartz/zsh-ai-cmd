@@ -15,6 +15,7 @@ submitting:
     ./test-api.sh --provider openai    # specific provider
     ./test-api-key-command.sh          # API key retrieval
     ./test-openai-base-url.sh          # custom base URL
+    ./test-anthropic-request.sh        # Anthropic request payload and response parsing (offline)
     ./test-sanitize.sh                 # output sanitization
     ./test-command-syntax.sh           # generated command syntax validation
 
