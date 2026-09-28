@@ -77,7 +77,7 @@ _zsh_ai_cmd_anthropic_call() {
   stop_reason=$(print -r -- "$response" | command jq -r '.stop_reason // empty' 2>/dev/null)
   case $stop_reason in
     max_tokens)
-      print -u2 "zsh-ai-cmd [anthropic]: response cut off at max_tokens; try ZSH_AI_CMD_ANTHROPIC_EFFORT=low"
+      print -u2 "zsh-ai-cmd [anthropic]: response cut off at max_tokens; lower ZSH_AI_CMD_ANTHROPIC_EFFORT"
       return 1 ;;
     refusal)
       print -u2 "zsh-ai-cmd [anthropic]: model declined the request"

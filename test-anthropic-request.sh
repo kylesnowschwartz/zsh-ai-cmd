@@ -109,7 +109,7 @@ result=$(_zsh_ai_cmd_anthropic_call "delete build dir" "$_ZSH_AI_CMD_PROMPT" 2>"
 rc=$?
 assert_equals "max_tokens stop returns nonzero" "1" "$(( rc != 0 ))"
 assert_equals "max_tokens stop yields no output" "" "$result"
-assert_contains "max_tokens stop explains the cutoff" "response cut off at max_tokens" "$(cat "$stderr_file")"
+assert_contains "max_tokens stop explains the cutoff" "response cut off at max_tokens; lower ZSH_AI_CMD_ANTHROPIC_EFFORT" "$(cat "$stderr_file")"
 
 mock_response '[]' refusal
 result=$(_zsh_ai_cmd_anthropic_call "delete build dir" "$_ZSH_AI_CMD_PROMPT" 2>"$stderr_file")
