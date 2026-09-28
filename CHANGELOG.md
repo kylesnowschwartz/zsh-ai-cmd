@@ -2,6 +2,36 @@
 
 All notable changes to zsh-ai-cmd are documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- `ZSH_AI_CMD_ANTHROPIC_EFFORT` (`low`, `medium`, `high`, `xhigh`, `max`)
+  controls how much Anthropic models think before answering; sent only when
+  set. `low` is recommended for Opus models (roughly halves latency); leave it
+  empty for the default Haiku 4.5, which rejects the setting
+- Offline test for the Anthropic request payload and response parsing
+  (`test-anthropic-request.sh`)
+
+### Fixed
+
+- Anthropic models with thinking always on (such as Claude Opus 5.5) no longer
+  show "no suggestion": the answer is read from the first text block instead of
+  the first content block, which is often a thinking block (#23)
+- Anthropic `max_tokens` raised from 1024 to 4096, since thinking tokens count
+  toward the limit and could truncate the answer
+- Anthropic structured output uses `output_config.format` instead of the
+  deprecated `output_format` parameter and no longer needs the
+  `anthropic-beta` header
+- Suggestions with incomplete shell syntax (unclosed quotes or blocks, a
+  trailing `&&` or `||`, heredocs, a dangling backslash, or `#` comments) are
+  dropped before they reach the command line, so accepting a suggestion never
+  leaves the shell at a continuation prompt; the prompt asks models for
+  single-line commands without heredocs or comments (#22, thanks @aeltawela)
+- External commands in the plugin and providers are called with the `command`
+  prefix so user aliases cannot change their behavior (#19, thanks
+  @OnCloud125252)
+
 ## [v0.4.0] - 2026-07-10
 
 ### Added
