@@ -3,6 +3,11 @@
 
 typeset -g ZSH_AI_CMD_ANTHROPIC_MODEL=${ZSH_AI_CMD_ANTHROPIC_MODEL:-'claude-haiku-4-5-20251001'}
 
+# Thinking effort (low, medium, high, xhigh, max), sent as output_config.effort
+# only when non-empty: the default Haiku 4.5 rejects the effort parameter.
+# 'low' is recommended for Opus models, which always think.
+typeset -g ZSH_AI_CMD_ANTHROPIC_EFFORT=${ZSH_AI_CMD_ANTHROPIC_EFFORT:-''}
+
 _zsh_ai_cmd_anthropic_call() {
   local input=$1
   local prompt=$2"$_ZSH_AI_CMD_PROMPT_STRUCTURED"
@@ -16,13 +21,14 @@ _zsh_ai_cmd_anthropic_call() {
     --arg system "$prompt" \
     --arg content "$input" \
     --argjson schema "$_ZSH_AI_CMD_SCHEMA" \
+    --arg effort "$ZSH_AI_CMD_ANTHROPIC_EFFORT" \
     '{
       model: $model,
       max_tokens: 4096,
       system: $system,
       messages: [{role: "user", content: $content}],
       output_format: {type: "json_schema", schema: $schema}
-    }')
+    } + (if $effort != "" then {output_config: {effort: $effort}} else {} end)')
 
   local response
   response=$(command curl -sS --max-time 30 "https://api.anthropic.com/v1/messages" \

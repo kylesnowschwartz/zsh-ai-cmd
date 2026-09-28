@@ -64,6 +64,8 @@ ZSH_AI_CMD_API_KEY_COMMAND=''    # Command to get API key, e.g., 'secret-tool lo
 
 # Provider-specific models (defaults shown)
 ZSH_AI_CMD_ANTHROPIC_MODEL='claude-haiku-4-5-20251001'
+ZSH_AI_CMD_ANTHROPIC_EFFORT=''               # Thinking effort: low, medium, high, xhigh, max; empty = not sent
+                                             # 'low' is recommended for Opus models (faster); Haiku 4.5 rejects it, leave empty
 ZSH_AI_CMD_OPENAI_MODEL='gpt-5.2-2025-12-11'
 ZSH_AI_CMD_OPENAI_BASE_URL='https://api.openai.com/v1/chat/completions'  # Custom OpenAI-compatible endpoint
 ZSH_AI_CMD_GEMINI_MODEL='gemini-3-flash-preview'
