@@ -73,8 +73,8 @@ _zsh_ai_cmd_anthropic_call() {
   esac
 
   # Extract suggestions from structured output (wire format: D/S<TAB>command per line).
-  # Models with thinking enabled put a thinking block before the text block, so
-  # select the first text block rather than content[0]; no text block yields no output.
+  # Thinking blocks can precede the answer, so take the first text block; a
+  # response without one yields no output.
   _zsh_ai_cmd_extract "$response" '[.content[] | select(.type == "text")][0].text'
 }
 

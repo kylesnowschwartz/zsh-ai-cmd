@@ -15,14 +15,15 @@ All notable changes to zsh-ai-cmd are documented in this file.
 
 ### Fixed
 
-- Anthropic models with thinking always on (such as Claude Opus 5.5) no longer
-  show "no suggestion": the answer is read from the first text block instead of
-  the first content block, which is often a thinking block (#23)
-- Anthropic `max_tokens` raised from 1024 to 4096, since thinking tokens count
-  toward the limit and could truncate the answer
-- Anthropic structured output uses `output_config.format` instead of the
-  deprecated `output_format` parameter and no longer needs the
-  `anthropic-beta` header
+- Anthropic models with thinking always on (such as Claude Opus 5.5) return
+  suggestions: the answer is read from the first text block, since a thinking
+  block often comes first (#23)
+- Anthropic `max_tokens` is 4096, since thinking tokens count toward the limit
+  and a smaller cap can truncate the answer
+- Anthropic responses cut off at `max_tokens` or refused by the model print
+  the reason to stderr
+- Anthropic structured output is sent as `output_config.format`, which needs
+  no `anthropic-beta` header
 - Suggestions with incomplete shell syntax (unclosed quotes or blocks, a
   trailing `&&` or `||`, heredocs, a dangling backslash, or `#` comments) are
   dropped before they reach the command line, so accepting a suggestion never
