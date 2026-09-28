@@ -8,14 +8,15 @@
 
 ## Testing
 
-Tests are integration tests that hit real APIs. Run them locally before
-submitting:
+`test-api.sh` calls the real provider API and needs a key. The other scripts
+run offline with stubbed commands or a local mock server. Run them locally
+before submitting:
 
-    ./test-api.sh                      # default (anthropic)
-    ./test-api.sh --provider openai    # specific provider
+    ./test-api.sh                      # live API: default (anthropic)
+    ./test-api.sh --provider openai    # live API: specific provider
     ./test-api-key-command.sh          # API key retrieval
     ./test-openai-base-url.sh          # custom base URL
-    ./test-anthropic-request.sh        # Anthropic request payload and response parsing (offline)
+    ./test-anthropic-request.sh        # Anthropic request payload and response parsing
     ./test-sanitize.sh                 # output sanitization
     ./test-command-syntax.sh           # generated command syntax validation
 

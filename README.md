@@ -46,6 +46,12 @@ tinted red and marked with `⚠` so you notice before accepting. Providers
 without structured output (`copilot`, `claude-code`) return a single
 suggestion and can't flag destructive commands.
 
+Suggestions that would leave your shell waiting for more input after Enter
+(an unclosed quote or block, a trailing `&&` or `||`, a trailing backslash, a
+heredoc, or a `#` comment) are dropped before they are shown. If every
+suggestion is dropped, the prompt shows `zsh-ai-cmd: no suggestion`; press
+`Ctrl+Z` again to ask for a new one.
+
 ## Configuration
 
 ```sh

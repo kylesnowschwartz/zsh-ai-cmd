@@ -25,7 +25,7 @@ typeset -g ZSH_AI_CMD_KEYCHAIN_NAME=${ZSH_AI_CMD_KEYCHAIN_NAME:-'${provider}-api
 # Examples: 'pass ${provider}-api-key', 'secret-tool lookup service ${provider}'
 typeset -g ZSH_AI_CMD_API_KEY_COMMAND=${ZSH_AI_CMD_API_KEY_COMMAND:-''}
 
-# Provider selection (anthropic, openai, gemini, deepseek, ollama)
+# Provider selection (anthropic, openai, gemini, deepseek, ollama, lmstudio, copilot, claude-code)
 typeset -g ZSH_AI_CMD_PROVIDER=${ZSH_AI_CMD_PROVIDER:-'anthropic'}
 
 # Legacy model variable maps to anthropic model for backwards compatibility

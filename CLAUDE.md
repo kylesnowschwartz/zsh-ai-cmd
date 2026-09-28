@@ -8,7 +8,7 @@ zsh-ai-cmd is a zsh plugin that translates natural language to shell commands us
 
 ## Architecture
 
-The main plugin lives in @zsh-ai-cmd.plugin.zsh with provider implementations in `providers/`.
+The main plugin lives in @zsh-ai-cmd.plugin.zsh with provider implementations in `providers/`, the shared prompt and schema in `prompt.zsh`, and the generated-command syntax check in `shell-syntax.zsh`.
 
 ### Supported Providers
 
@@ -61,6 +61,7 @@ All providers use structured outputs (JSON schema) where supported for reliable 
 - **Widget function** `_zsh_ai_cmd_suggest`: Main entry point bound to keybinding. Captures buffer text, shows spinner, calls API, displays result as ghost text via `POSTDISPLAY`.
 - **API call** `_zsh_ai_cmd_call_api`: Background curl with animated braille spinner. Uses ZLE redraw for UI updates during blocking wait.
 - **Key retrieval** `_zsh_ai_cmd_get_key`: Lazy-loads API key from env var or macOS Keychain.
+- **Syntax check** `_zsh_ai_cmd_is_valid_syntax` (`shell-syntax.zsh`): Runs on each sanitized suggestion before it is shown. Drops commands that would leave an interactive shell at a continuation prompt: anything `zsh -f -n -c` rejects, plus cases parse-only mode accepts at end of input (an odd run of trailing backslashes, a trailing `&&` or `||`, a `<<` heredoc) and any `#` comment. Runs under `emulate -L zsh` so user options such as `ksh_arrays` don't change the result. When nothing survives, the widget shows `zsh-ai-cmd: no suggestion`.
 
 **Ghost Text System:**
 
@@ -77,7 +78,17 @@ All providers use structured outputs (JSON schema) where supported for reliable 
 
 ## Testing
 
-API response validation tests live in @test-api.sh:
+Offline tests (no API key or network):
+
+```sh
+./test-command-syntax.sh      # generated command syntax check
+./test-anthropic-request.sh   # Anthropic request payload and response parsing (fake curl on PATH)
+./test-sanitize.sh            # model output sanitization
+./test-api-key-command.sh     # API key retrieval
+./test-openai-base-url.sh     # custom OpenAI base URL (local mock server)
+```
+
+API response validation tests live in @test-api.sh and call the real provider API:
 
 ```sh
 # Test default provider (anthropic)
@@ -145,7 +156,7 @@ zsh-ai-cmd follows **Semantic Versioning** (`vMAJOR.MINOR.PATCH`) consistent wit
 
 #### Step 1: Prepare Changes
 
-- Ensure all tests pass: `./test-api.sh` and `./test-api-key-command.sh`
+- Ensure all tests pass: `./test-api.sh` plus the offline tests listed under Testing
 - Review commits since last release: `git log --oneline v0.1.0..HEAD`
 - Update CHANGELOG.md with new version section
 
@@ -214,8 +225,12 @@ git describe --tags --abbrev=0
 ### Testing Before Release
 
 ```sh
-# Run feature tests
+# Run offline tests
+./test-command-syntax.sh
+./test-anthropic-request.sh
+./test-sanitize.sh
 ./test-api-key-command.sh
+./test-openai-base-url.sh
 
 # Run API validation tests
 ./test-api.sh --provider anthropic
