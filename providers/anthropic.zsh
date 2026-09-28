@@ -60,6 +60,18 @@ _zsh_ai_cmd_anthropic_call() {
     return 1
   fi
 
+  # A truncated or refused response has no usable answer; say why
+  local stop_reason
+  stop_reason=$(print -r -- "$response" | command jq -r '.stop_reason // empty' 2>/dev/null)
+  case $stop_reason in
+    max_tokens)
+      print -u2 "zsh-ai-cmd [anthropic]: response cut off at max_tokens; try ZSH_AI_CMD_ANTHROPIC_EFFORT=low"
+      return 1 ;;
+    refusal)
+      print -u2 "zsh-ai-cmd [anthropic]: model declined the request"
+      return 1 ;;
+  esac
+
   # Extract suggestions from structured output (wire format: D/S<TAB>command per line).
   # Models with thinking enabled put a thinking block before the text block, so
   # select the first text block rather than content[0]; no text block yields no output.

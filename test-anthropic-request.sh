@@ -49,10 +49,25 @@ assert_equals() {
   fi
 }
 
-# Writes a canned Messages API response whose content array is CONTENT_JSON.
+# Writes a canned Messages API response whose content array is CONTENT_JSON,
+# with STOP_REASON (default end_turn).
 mock_response() {
-  command jq -nc --argjson content "$1" '{type: "message", role: "assistant", content: $content}' \
+  command jq -nc --argjson content "$1" --arg stop "${2:-end_turn}" \
+    '{type: "message", role: "assistant", content: $content, stop_reason: $stop}' \
     > "$MOCK_DIR/response"
+}
+
+assert_contains() {
+  local name=$1 pattern=$2 text=$3
+  if [[ $text == *"$pattern"* ]]; then
+    print -P "%F{green}✓ PASS%f: $name"
+    ((PASS++))
+  else
+    print -P "%F{red}✗ FAIL%f: $name"
+    print -r -- "  Pattern: $pattern"
+    print -r -- "  Text:    $text"
+    ((FAIL++))
+  fi
 }
 
 answer_json=$(command jq -nc '{
@@ -83,6 +98,31 @@ result=$(_zsh_ai_cmd_anthropic_call "delete build dir" "$_ZSH_AI_CMD_PROMPT")
 rc=$?
 assert_equals "thinking block alone yields no output" "" "$result"
 assert_equals "thinking block alone returns nonzero" "1" "$(( rc != 0 ))"
+
+print ""
+print "=== Stop reasons ==="
+
+stderr_file="$MOCK_DIR/stderr"
+
+mock_response "[$thinking_block]" max_tokens
+result=$(_zsh_ai_cmd_anthropic_call "delete build dir" "$_ZSH_AI_CMD_PROMPT" 2>"$stderr_file")
+rc=$?
+assert_equals "max_tokens stop returns nonzero" "1" "$(( rc != 0 ))"
+assert_equals "max_tokens stop yields no output" "" "$result"
+assert_contains "max_tokens stop explains the cutoff" "response cut off at max_tokens" "$(cat "$stderr_file")"
+
+mock_response '[]' refusal
+result=$(_zsh_ai_cmd_anthropic_call "delete build dir" "$_ZSH_AI_CMD_PROMPT" 2>"$stderr_file")
+rc=$?
+assert_equals "refusal returns nonzero" "1" "$(( rc != 0 ))"
+assert_contains "refusal explains the decline" "model declined the request" "$(cat "$stderr_file")"
+
+mock_response "[$thinking_block,$text_block]" end_turn
+result=$(_zsh_ai_cmd_anthropic_call "delete build dir" "$_ZSH_AI_CMD_PROMPT" 2>"$stderr_file")
+rc=$?
+assert_equals "end_turn returns zero" "0" "$rc"
+assert_equals "end_turn yields the answer" "$expected_wire" "$result"
+assert_equals "end_turn writes nothing to stderr" "" "$(cat "$stderr_file")"
 
 print ""
 print "=== Request payload (effort unset) ==="
