@@ -3,14 +3,26 @@
 
 typeset -g ZSH_AI_CMD_ANTHROPIC_MODEL=${ZSH_AI_CMD_ANTHROPIC_MODEL:-'claude-haiku-4-5-20251001'}
 
-# Thinking effort (low, medium, high, xhigh, max), sent as output_config.effort
-# only when non-empty: the default Haiku 4.5 rejects the effort parameter.
-# 'low' is recommended for Opus models, which always think.
-typeset -g ZSH_AI_CMD_ANTHROPIC_EFFORT=${ZSH_AI_CMD_ANTHROPIC_EFFORT:-''}
+# Thinking effort (low, medium, high, xhigh, max), sent as output_config.effort.
+# Defaults to low, which keeps thinking models fast; set it to empty to send no
+# effort. Models that reject the parameter never receive it.
+typeset -g ZSH_AI_CMD_ANTHROPIC_EFFORT=${ZSH_AI_CMD_ANTHROPIC_EFFORT-low}
+
+# Haiku and Sonnet 4.5 reject output_config.effort with a 400. Skipping it for
+# the whole family is harmless if a later model in it gains support.
+_zsh_ai_cmd_anthropic_supports_effort() {
+  case $1 in
+    claude-haiku-*|claude-sonnet-4-5*) return 1 ;;
+    *) return 0 ;;
+  esac
+}
 
 _zsh_ai_cmd_anthropic_call() {
   local input=$1
   local prompt=$2"$_ZSH_AI_CMD_PROMPT_STRUCTURED"
+
+  local effort=$ZSH_AI_CMD_ANTHROPIC_EFFORT
+  _zsh_ai_cmd_anthropic_supports_effort "$ZSH_AI_CMD_ANTHROPIC_MODEL" || effort=""
 
   # max_tokens covers thinking plus the full structured payload: thinking tokens
   # count toward the limit, and the answer holds a primary + 2 alternatives of
@@ -21,7 +33,7 @@ _zsh_ai_cmd_anthropic_call() {
     --arg system "$prompt" \
     --arg content "$input" \
     --argjson schema "$_ZSH_AI_CMD_SCHEMA" \
-    --arg effort "$ZSH_AI_CMD_ANTHROPIC_EFFORT" \
+    --arg effort "$effort" \
     '{
       model: $model,
       max_tokens: 4096,

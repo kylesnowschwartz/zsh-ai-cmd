@@ -7,9 +7,9 @@ All notable changes to zsh-ai-cmd are documented in this file.
 ### Added
 
 - `ZSH_AI_CMD_ANTHROPIC_EFFORT` (`low`, `medium`, `high`, `xhigh`, `max`)
-  controls how much Anthropic models think before answering; sent only when
-  set. `low` is recommended for Opus models (roughly halves latency); leave it
-  empty for the default Haiku 4.5, which rejects the setting
+  controls how much Anthropic models think before answering. The default is
+  `low`, which roughly halves latency on Opus models; set it to empty to send
+  none. It is ignored for Haiku and Sonnet 4.5 models, which reject it
 - Offline test for the Anthropic request payload and response parsing
   (`test-anthropic-request.sh`)
 

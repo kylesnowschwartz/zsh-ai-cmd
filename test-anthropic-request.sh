@@ -125,7 +125,7 @@ assert_equals "end_turn yields the answer" "$expected_wire" "$result"
 assert_equals "end_turn writes nothing to stderr" "" "$(cat "$stderr_file")"
 
 print ""
-print "=== Request payload (effort unset) ==="
+print "=== Request payload ==="
 
 mock_response "[$text_block]"
 _zsh_ai_cmd_anthropic_call "delete build dir" "$_ZSH_AI_CMD_PROMPT" >/dev/null
@@ -133,19 +133,45 @@ assert_equals "no deprecated output_format" "false" "$(payload_field 'has("outpu
 assert_equals "structured output sent as output_config.format" '"json_schema"' "$(payload_field '.output_config.format.type')"
 assert_equals "schema sent in output_config.format" "$(command jq -c . <<< "$_ZSH_AI_CMD_SCHEMA")" "$(payload_field '.output_config.format.schema')"
 assert_equals "max_tokens leaves room for thinking" "4096" "$(payload_field '.max_tokens')"
-assert_equals "no effort key when unset" "false" "$(payload_field '.output_config | has("effort")')"
 assert_equals "no thinking param" "false" "$(payload_field 'has("thinking")')"
 beta_headers=$(command grep -ci '^anthropic-beta:' "$MOCK_DIR/headers")
 assert_equals "no anthropic-beta header" "0" "$beta_headers"
 
 print ""
-print "=== Request payload (effort low) ==="
+print "=== Effort setting ==="
 
-ZSH_AI_CMD_ANTHROPIC_EFFORT=low
-_zsh_ai_cmd_anthropic_call "delete build dir" "$_ZSH_AI_CMD_PROMPT" >/dev/null
-assert_equals "effort sent as output_config.effort" '"low"' "$(payload_field '.output_config.effort')"
-assert_equals "format kept alongside effort" '"json_schema"' "$(payload_field '.output_config.format.type')"
-ZSH_AI_CMD_ANTHROPIC_EFFORT=''
+UNSET='<unset>'
+
+# Prints the request's output_config (compact JSON) for MODEL with the effort
+# setting EFFORT, where $UNSET leaves the variable unset. The provider applies
+# its effort default when sourced, so each case re-sources it in a subshell.
+request_output_config() {
+  local model=$1 effort=$2
+  (
+    if [[ $effort == "$UNSET" ]]; then
+      unset ZSH_AI_CMD_ANTHROPIC_EFFORT
+    else
+      ZSH_AI_CMD_ANTHROPIC_EFFORT=$effort
+    fi
+    ZSH_AI_CMD_ANTHROPIC_MODEL=$model
+    source "$SCRIPT_DIR/providers/anthropic.zsh"
+    _zsh_ai_cmd_anthropic_call "delete build dir" "$_ZSH_AI_CMD_PROMPT" >/dev/null
+    payload_field '.output_config'
+  )
+}
+
+opus_default=$(request_output_config claude-opus-5-5 "$UNSET")
+assert_equals "default effort is low for Opus" '"low"' "$(command jq -c '.effort' <<< "$opus_default")"
+assert_equals "format kept alongside effort" '"json_schema"' "$(command jq -c '.format.type' <<< "$opus_default")"
+
+assert_equals "default effort not sent to Haiku 4.5" "false" \
+  "$(request_output_config claude-haiku-4-5-20251001 "$UNSET" | command jq -c 'has("effort")')"
+assert_equals "default effort not sent to Sonnet 4.5" "false" \
+  "$(request_output_config claude-sonnet-4-5-20250929 "$UNSET" | command jq -c 'has("effort")')"
+assert_equals "explicitly empty effort sends none to Opus" "false" \
+  "$(request_output_config claude-opus-5-5 '' | command jq -c 'has("effort")')"
+assert_equals "medium effort sent to Opus" '"medium"' \
+  "$(request_output_config claude-opus-5-5 medium | command jq -c '.effort')"
 
 print ""
 print "================================"

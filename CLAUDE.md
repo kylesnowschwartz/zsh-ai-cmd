@@ -25,7 +25,7 @@ The main plugin lives in @zsh-ai-cmd.plugin.zsh with provider implementations in
 
 Set provider via `ZSH_AI_CMD_PROVIDER='openai'` (default: `anthropic`).
 
-**Note:** Anthropic reads the answer from the first `text` content block, since models with thinking on (Opus) put a `thinking` block first. `ZSH_AI_CMD_ANTHROPIC_EFFORT` (`low`|`medium`|`high`|`xhigh`|`max`) is sent as `output_config.effort` only when set; `low` is recommended for Opus models (skips most thinking, roughly halves latency). Leave it empty for the default Haiku 4.5, which rejects the effort parameter.
+**Note:** Anthropic reads the answer from the first `text` content block, since models with thinking on (Opus) put a `thinking` block first. `ZSH_AI_CMD_ANTHROPIC_EFFORT` (`low`|`medium`|`high`|`xhigh`|`max`, default `low`) is sent as `output_config.effort`; `low` skips most thinking and roughly halves latency on Opus models. Setting it to empty sends no effort. `_zsh_ai_cmd_anthropic_supports_effort` skips it for `claude-haiku-*` and `claude-sonnet-4-5*`, which reject the parameter with a 400.
 
 **Note:** Copilot requires [copilot-api](https://github.com/ericc-ch/copilot-api) to be running. Install and start with `npx copilot-api start`.
 
